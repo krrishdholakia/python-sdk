@@ -1,4 +1,4 @@
-# Airplane Python SDK ![PyPI](https://img.shields.io/pypi/v/airplanesdk) ![PyPI - License](https://img.shields.io/pypi/l/airplanesdk)
+# Airplane Python SDK [![PyPI](https://img.shields.io/pypi/v/airplanesdk)](https://pypi.org/project/airplanesdk/) [![PyPI - License](https://img.shields.io/pypi/l/airplanesdk)](./LICENSE)
 
 An SDK for writing Airplane tasks in Python.
 
