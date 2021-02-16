@@ -1,6 +1,6 @@
 """airplane - An SDK for writing Airplane tasks in Python"""
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __author__ = "Airplane <support@airplane.dev>"
 __all__ = []
 
