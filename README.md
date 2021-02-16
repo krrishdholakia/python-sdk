@@ -7,7 +7,7 @@ An SDK for writing Airplane tasks in Python.
 First, install the SDK:
 
 ```sh
-pip install airplane
+pip install airplanesdk
 ```
 
 Next, you can use the SDK to produce outputs which will be separated from your logs:
