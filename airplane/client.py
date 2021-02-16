@@ -47,7 +47,6 @@ class Airplane:
         (
             requests.exceptions.ConnectionError,
             requests.exceptions.Timeout,
-            RunFailedException,
             RunPendingException,
         ),
         max_tries=1000,
