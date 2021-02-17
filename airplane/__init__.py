@@ -24,9 +24,9 @@ def write_named_output(name, value):
     return _proxy("write_named_output", name, value)
 
 
-def run(task_id, parameters):
+def run(task_id, parameters, env={}, constraints={}):
     """Triggers an Airplane task with the provided arguments."""
-    return _proxy("run", task_id, parameters)
+    return _proxy("run", task_id, parameters, env=env, constraints=constraints)
 
 
 def _proxy(method, *args, **kwargs):

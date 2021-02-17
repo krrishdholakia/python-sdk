@@ -21,7 +21,7 @@ class Airplane:
         """Writes the value to the task's output, tagged by the key."""
         print("airplane_output:%s %s" % name, json.dumps(value, separators=(",", ":")))
 
-    def run(self, task_id, parameters):
+    def run(self, task_id, parameters, env={}, constraints={}):
         """Triggers an Airplane task with the provided arguments."""
         # Boot the new task:
         resp = requests.post(
@@ -29,6 +29,8 @@ class Airplane:
             json={
                 "taskID": task_id,
                 "params": parameters,
+                "env": env,
+                "constraints": constraints,
             },
             headers={
                 "X-Airplane-Token": self._api_token,
