@@ -55,7 +55,8 @@ class Airplane:
     )
     def __getOutput(self, run_id):
         resp = requests.get(
-            "%s/taskRuntime/getOutput/%s" % (self._api_host, run_id),
+            "%s/taskRuntime/getOutput" % self._api_host,
+            params={"runID": run_id},
             headers={
                 "X-Airplane-Token": self._api_token,
             },
