@@ -2,8 +2,9 @@ import json
 import os
 import requests
 import backoff
+from requests.models import HTTPError
 
-from .exceptions import RunFailedException, RunPendingException
+from .exceptions import InvalidEnvironmentException, RunPendingException
 
 
 class Airplane:
@@ -15,17 +16,21 @@ class Airplane:
 
     def write_output(self, value):
         """Writes the value to the task's output."""
-        print("airplane_output %s" % json.dumps(value, separators=(",", ":")))
+        val = json.dumps(value, separators=(",", ":"))
+        print(f"airplane_output {val}")
 
     def write_named_output(self, name, value):
         """Writes the value to the task's output, tagged by the key."""
-        print("airplane_output:%s %s" % name, json.dumps(value, separators=(",", ":")))
+        val = json.dumps(value, separators=(",", ":"))
+        print(f"airplane_output:{name} {val}")
 
     def run(self, task_id, parameters, env={}, constraints={}):
         """Triggers an Airplane task with the provided arguments."""
+        self.__require_runtime()
+
         # Boot the new task:
         resp = requests.post(
-            "%s/taskRuntime/runTask" % (self._api_host),
+            f"{self._api_host}/v0/runs/create",
             json={
                 "taskID": task_id,
                 "params": parameters,
@@ -36,10 +41,20 @@ class Airplane:
                 "X-Airplane-Token": self._api_token,
             },
         )
+        self.__check_resp(resp)
         body = resp.json()
         run_id = body["runID"]
 
-        return self.__getOutput(run_id)
+        return self.__wait(run_id)
+
+    def __check_resp(self, resp):
+        if resp.status_code >= 400:
+            raise HTTPError(resp.json()["error"])
+
+    def __require_runtime(self):
+        """Ensures that the current task is running inside of an Airplane task."""
+        if self._api_host is None or self._api_token is None:
+            raise InvalidEnvironmentException()
 
     def __backoff():
         yield from backoff.expo(factor=0.1, max_value=5)
@@ -53,19 +68,30 @@ class Airplane:
         ),
         max_tries=1000,
     )
-    def __getOutput(self, run_id):
+    def __wait(self, run_id):
         resp = requests.get(
-            "%s/taskRuntime/getOutput" % self._api_host,
+            f"{self._api_host}/v0/runs/get",
             params={"runID": run_id},
             headers={
                 "X-Airplane-Token": self._api_token,
             },
         )
+        self.__check_resp(resp)
         body = resp.json()
-        run_status, output = body["runStatus"], body["output"]
-        if run_status == "Failed":
-            raise RunFailedException()
-        elif run_status == "Succeeded":
-            return output
-        else:
+        run_status = body["run"]["status"]
+
+        if run_status in ("NotStarted", "Queued", "Active"):
+            # Retry...
             raise RunPendingException()
+
+        resp = requests.get(
+            f"{self._api_host}/v0/runs/getOutputs",
+            params={"runID": run_id},
+            headers={
+                "X-Airplane-Token": self._api_token,
+            },
+        )
+        self.__check_resp(resp)
+        body = resp.json()
+
+        return {"status": run_status, "outputs": body["outputs"]}

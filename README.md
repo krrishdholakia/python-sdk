@@ -1,4 +1,4 @@
-# Airplane Python SDK [![PyPI](https://img.shields.io/pypi/v/airplanesdk)](https://pypi.org/project/airplanesdk/) [![PyPI - License](https://img.shields.io/pypi/l/airplanesdk)](./LICENSE)
+# Airplane Python SDK [![PyPI](https://img.shields.io/pypi/v/airplanesdk)](https://pypi.org/project/airplanesdk/) [![PyPI - License](https://img.shields.io/pypi/l/airplanesdk)](./LICENSE) [![Docs](https://img.shields.io/badge/Docs-Python%20SDK-blue)](https://docs.airplane.dev/reference/runtime-api-and-airplane-sdk/python-sdk)
 
 An SDK for writing Airplane tasks in Python.
 
@@ -29,14 +29,17 @@ This SDK can be used to programmatically kick off tasks and fetch their output:
 # You can get a task's ID from the URL bar, f.e.
 # https://app.airplane.dev/tasks/1oMt2mZC1DjkOZXxHH8BV57xrmF
 task_id = "..."
-run_output = airplane.run(task_id, {
+resp = airplane.run(task_id, {
   # Optionally provide parameters to your task, using the same name
   # as when templating a parameter into your task's CLI args.
   "DryRun": True,
 })
-# run() will return a dict of outputs, by name.
-# Default outputs are available as `run_output.output`.
-print(run_output)
+
+# run() will return the run's status (Succeeded, Failed, Cancelled) and a
+# dict of outputs, by name.
+#
+# Default outputs are available as `resp["outputs"]["output"]`.
+print(resp["outputs"])
 ```
 
 ## Contributing
