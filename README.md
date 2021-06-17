@@ -41,16 +41,3 @@ resp = airplane.run(task_id, {
 # Default outputs are available as `resp["outputs"]["output"]`.
 print(resp["outputs"])
 ```
-
-## Contributing
-
-### Deployment
-
-To deploy a new version of this SDK:
-
-1. Bump the version number in `pyproject.toml` and `airplane/__init__.py`
-2. Run the following to build and publish to PyPI:
-
-```sh
-poetry publish --build --username=airplane
-```

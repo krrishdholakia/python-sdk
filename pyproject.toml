@@ -1,7 +1,7 @@
 
 [tool.poetry]
 name = "airplanesdk"
-version = "0.2.0"
+version = "0.2.2"
 description = "A Python SDK for writing Airplane tasks"
 authors = ["Airplane <support@airplane.dev>"]
 license = "MIT"
@@ -13,7 +13,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.6"
 requests = "^2.25.1"
 backoff = "^1.10.0"
 
