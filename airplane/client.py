@@ -22,7 +22,7 @@ class Airplane:
     def write_named_output(self, name, value):
         """Writes the value to the task's output, tagged by the key."""
         val = json.dumps(value, separators=(",", ":"))
-        print(f"airplane_output:{name} {val}")
+        print(f"airplane_output:\"{name}\" {val}")
 
     def run(self, task_id, parameters, env={}, constraints={}):
         """Triggers an Airplane task with the provided arguments."""
