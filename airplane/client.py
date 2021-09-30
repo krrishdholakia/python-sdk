@@ -1,9 +1,12 @@
+import backoff
+import deprecation
 import json
 import os
 import requests
-import backoff
 from requests.models import HTTPError
+import uuid
 
+from . import __version__
 from .exceptions import InvalidEnvironmentException, RunPendingException
 
 
@@ -14,15 +17,49 @@ class Airplane:
         self._api_host = api_host
         self._api_token = api_token
 
+    def set_output(self, value, path=""):
+        """Sets the task output. Optionally takes a JSON path which can be used
+        to set a subpath
+        """
+        val = json.dumps(value, separators=(",", ":"))
+        maybe_path = "" if path == "" else f":{path}"
+        self.__chunk_print(f"airplane_output_set{maybe_path} {val}")
+
+    def append_output(self, value, path=""):
+        """Appends to an array in the task output. Optionally takes a JSON path
+        which can be used to append to a subpath
+        """
+        val = json.dumps(value, separators=(",", ":"))
+        maybe_path = "" if path == "" else f":{path}"
+        self.__chunk_print(f"airplane_output_append{maybe_path} {val}")
+
+    @deprecation.deprecated(
+            deprecated_in="0.3.0", 
+            current_version=__version__,
+            details="Use set_output or append_output instead, append_output should have a similar result as this function.")
     def write_output(self, value):
         """Writes the value to the task's output."""
         val = json.dumps(value, separators=(",", ":"))
-        print(f"airplane_output {val}")
+        self.__chunk_print(f"airplane_output {val}")
 
+    @deprecation.deprecated(
+            deprecated_in="0.3.0",
+            current_version=__version__,
+            details="Use set_output or append_output instead, append_output with path equal to the name should have a similar result as this function.")
     def write_named_output(self, name, value):
         """Writes the value to the task's output, tagged by the key."""
         val = json.dumps(value, separators=(",", ":"))
-        print(f"airplane_output:\"{name}\" {val}")
+        self.__chunk_print(f"airplane_output:\"{name}\" {val}")
+
+    def __chunk_print(self, output):
+        CHUNK_SIZE = 8192
+        if len(output) <= CHUNK_SIZE:
+            print(output)
+        else:
+            chunk_key = str(uuid.uuid4())
+            for i in range(0, len(output), CHUNK_SIZE):
+                print(f"airplane_chunk:{chunk_key} {output[i:i+CHUNK_SIZE]}")
+            print(f"airplane_chunk_end:{chunk_key}")
 
     def run(self, task_id, parameters, env={}, constraints={}):
         """Triggers an Airplane task with the provided arguments."""
