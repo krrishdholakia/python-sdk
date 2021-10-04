@@ -2,6 +2,7 @@ import backoff
 import deprecation
 import json
 import os
+import re
 import requests
 from requests.models import HTTPError
 import uuid
@@ -17,21 +18,37 @@ class Airplane:
         self._api_host = api_host
         self._api_token = api_token
 
-    def set_output(self, value, path=""):
+    def set_output(self, value, *path):
         """Sets the task output. Optionally takes a JSON path which can be used
-        to set a subpath
+        to set a subpath of the output.
         """
         val = json.dumps(value, separators=(",", ":"))
-        maybe_path = "" if path == "" else f":{path}"
+        js_path = self.__to_js_path(path)
+        maybe_path = "" if js_path == "" else f":{js_path}"
         self.__chunk_print(f"airplane_output_set{maybe_path} {val}")
 
-    def append_output(self, value, path=""):
+    def append_output(self, value, *path):
         """Appends to an array in the task output. Optionally takes a JSON path
-        which can be used to append to a subpath
+        which can be used to append to a subpath of the output.
         """
         val = json.dumps(value, separators=(",", ":"))
-        maybe_path = "" if path == "" else f":{path}"
+        js_path = self.__to_js_path(path)
+        maybe_path = "" if js_path == "" else f":{js_path}"
         self.__chunk_print(f"airplane_output_append{maybe_path} {val}")
+
+    def __to_js_path(self, path):
+        ret = ""
+        for i, val in enumerate(path):
+            if isinstance(val, str):
+                if re.search(r"^\w+$", val) is not None:
+                    if i > 0:
+                        ret += "."
+                    ret += val
+                else:
+                    ret += "[\"" + val.replace("\\", "\\\\").replace("\"", "\\\"") + "\"]"
+            elif isinstance(val, int):
+                ret += "[" + str(val) + "]"
+        return ret
 
     @deprecation.deprecated(
             deprecated_in="0.3.0", 
