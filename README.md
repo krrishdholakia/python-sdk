@@ -1,43 +1,36 @@
-# Airplane Python SDK [![PyPI](https://img.shields.io/pypi/v/airplanesdk)](https://pypi.org/project/airplanesdk/) [![PyPI - License](https://img.shields.io/pypi/l/airplanesdk)](./LICENSE) [![Docs](https://img.shields.io/badge/Docs-Python%20SDK-blue)](https://docs.airplane.dev/reference/runtime-api-and-airplane-sdk/python-sdk)
+# Airplane Python SDK [![PyPI](https://img.shields.io/pypi/v/airplanesdk)](https://pypi.org/project/airplanesdk/) [![PyPI - License](https://img.shields.io/pypi/l/airplanesdk)](./LICENSE) [![Docs](https://img.shields.io/badge/Docs-airplane-blue)](https://docs.airplane.dev/creating-tasks/python)
 
-An SDK for writing Airplane tasks in Python.
+SDK for writing [Airplane](https://airplane.dev) tasks in Python.
 
-## Usage
-
-First, install the SDK:
+## Getting started
 
 ```sh
 pip install airplanesdk
 ```
 
-Next, you can use the SDK to produce outputs which will be separated from your logs:
+## Usage
 
-```python
+To write a Python task in Airplane, create a `.py` file and export a function like so:
+
+```py
 import airplane
 
-airplane.write_output("Show me what you got")
-
-# You can also separate outputs into groups by attaching names:
-airplane.write_named_output("saying", "Show me what you got")
-airplane.write_named_output("saying", "Welcome to the club, pal")
-airplane.write_named_output("name", "Summer")
+def main(params):
+  return f"Hello, {params['name']}"
 ```
 
-This SDK can be used to programmatically kick off tasks and fetch their output:
+You can configure the parameters that your task will receive in the [Airplane UI](http://app.airplane.dev/). They'll be passed through the `params` argument to your function as a dictionary keyed by the slugs you see in the UI.
 
-```python
-# You can get a task's ID from the URL bar, f.e.
-# https://app.airplane.dev/tasks/1oMt2mZC1DjkOZXxHH8BV57xrmF
-task_id = "..."
-resp = airplane.run(task_id, {
-  # Optionally provide parameters to your task, using the same name
-  # as when templating a parameter into your task's CLI args.
-  "DryRun": True,
-})
+To execute your task, first [install the Airplane CLI](https://docs.airplane.dev/platform/airplane-cli).
 
-# run() will return the run's status (Succeeded, Failed, Cancelled) and a
-# dict of outputs, by name.
-#
-# Default outputs are available as `resp["outputs"]["output"]`.
-print(resp["outputs"])
+Once installed, execute your task locally:
+
+```sh
+airplane dev ./path/to/file.py -- --name=World
+```
+
+If that looks good, deploy your task to Airplane and give it a [run in the UI](https://app.airplane.dev/library)!
+
+```sh
+airplane deploy ./path/to/file.py
 ```

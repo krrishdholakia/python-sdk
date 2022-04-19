@@ -93,6 +93,8 @@ class Airplane:
             },
             headers={
                 "X-Airplane-Token": self._api_token,
+                "X-Airplane-Client-Kind": "sdk/python",
+                "X-Airplane-Client-Version": __version__,
             },
         )
         self.__check_resp(resp)
@@ -128,6 +130,8 @@ class Airplane:
             params={"runID": run_id},
             headers={
                 "X-Airplane-Token": self._api_token,
+                "X-Airplane-Client-Kind": "sdk/python",
+                "X-Airplane-Client-Version": __version__,
             },
         )
         self.__check_resp(resp)
@@ -143,6 +147,8 @@ class Airplane:
             params={"runID": run_id},
             headers={
                 "X-Airplane-Token": self._api_token,
+                "X-Airplane-Client-Kind": "sdk/python",
+                "X-Airplane-Client-Version": __version__,
             },
         )
         self.__check_resp(resp)

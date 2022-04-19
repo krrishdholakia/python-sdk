@@ -1,6 +1,6 @@
 """airplane - An SDK for writing Airplane tasks in Python"""
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __all__ = ["Airplane"]
 
 import deprecation
@@ -10,8 +10,8 @@ from .client import Airplane
 
 default_client = None
 
-_api_host = os.getenv("AP_TASK_RUNTIME_API_HOST")
-_api_token = os.getenv("AP_TASK_RUNTIME_TOKEN")
+_api_host = os.getenv("AIRPLANE_API_HOST")
+_api_token = os.getenv("AIRPLANE_TOKEN")
 
 def set_output(value, *path):
     """Sets the task output. Optionally takes a JSON path which can be used
