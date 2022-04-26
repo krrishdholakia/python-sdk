@@ -28,7 +28,7 @@ def append_output(value, *path):
 @deprecation.deprecated(
         deprecated_in="0.3.0", 
         current_version=__version__,
-        details="Use set_output or append_output instead, append_output should have a similar result as this function.")
+        details="Use append_output(value) instead.")
 def write_output(value):
     """Writes the value to the task's output."""
     return _proxy("write_output", value)
@@ -37,7 +37,7 @@ def write_output(value):
 @deprecation.deprecated(
         deprecated_in="0.3.0",
         current_version=__version__,
-        details="Use set_output or append_output instead, append_output with path equal to the name should have a similar result as this function.")
+        details="Use append_output(value, name) instead.")
 def write_named_output(name, value):
     """Writes the value to the task's output, tagged by the key."""
     return _proxy("write_named_output", name, value)

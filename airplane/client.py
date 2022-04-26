@@ -53,7 +53,7 @@ class Airplane:
     @deprecation.deprecated(
             deprecated_in="0.3.0", 
             current_version=__version__,
-            details="Use set_output or append_output instead, append_output should have a similar result as this function.")
+            details="Use append_output(value) instead.")
     def write_output(self, value):
         """Writes the value to the task's output."""
         val = json.dumps(value, separators=(",", ":"))
@@ -62,7 +62,7 @@ class Airplane:
     @deprecation.deprecated(
             deprecated_in="0.3.0",
             current_version=__version__,
-            details="Use set_output or append_output instead, append_output with path equal to the name should have a similar result as this function.")
+            details="Use append_output(value, name) instead.")
     def write_named_output(self, name, value):
         """Writes the value to the task's output, tagged by the key."""
         val = json.dumps(value, separators=(",", ":"))
