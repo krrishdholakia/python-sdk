@@ -127,7 +127,7 @@ class Airplane:
     def __wait(self, run_id):
         resp = requests.get(
             f"{self._api_host}/v0/runs/get",
-            params={"runID": run_id},
+            params={"id": run_id},
             headers={
                 "X-Airplane-Token": self._api_token,
                 "X-Airplane-Client-Kind": "sdk/python",
@@ -136,7 +136,7 @@ class Airplane:
         )
         self.__check_resp(resp)
         body = resp.json()
-        run_status = body["run"]["status"]
+        run_status = body["status"]
 
         if run_status in ("NotStarted", "Queued", "Active"):
             # Retry...
@@ -144,7 +144,7 @@ class Airplane:
 
         resp = requests.get(
             f"{self._api_host}/v0/runs/getOutputs",
-            params={"runID": run_id},
+            params={"id": run_id},
             headers={
                 "X-Airplane-Token": self._api_token,
                 "X-Airplane-Client-Kind": "sdk/python",
@@ -154,4 +154,4 @@ class Airplane:
         self.__check_resp(resp)
         body = resp.json()
 
-        return {"status": run_status, "outputs": body["outputs"]}
+        return {"status": run_status, "outputs": body["output"]}
