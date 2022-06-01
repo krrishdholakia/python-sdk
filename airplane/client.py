@@ -1,13 +1,13 @@
-import backoff
-import deprecation
 import json
-import os
 import re
-import requests
-from requests.models import HTTPError
 import uuid
 
-from . import __version__
+import backoff
+import deprecation
+import requests
+from requests.models import HTTPError
+
+from . import __version__  # pylint: disable=cyclic-import
 from .exceptions import InvalidEnvironmentException, RunPendingException
 
 
@@ -36,7 +36,8 @@ class Airplane:
         maybe_path = "" if js_path == "" else f":{js_path}"
         self.__chunk_print(f"airplane_output_append{maybe_path} {val}")
 
-    def __to_js_path(self, path):
+    @classmethod
+    def __to_js_path(cls, path):
         ret = ""
         for i, val in enumerate(path):
             if isinstance(val, str):
@@ -45,40 +46,43 @@ class Airplane:
                         ret += "."
                     ret += val
                 else:
-                    ret += "[\"" + val.replace("\\", "\\\\").replace("\"", "\\\"") + "\"]"
+                    ret += '["' + val.replace("\\", "\\\\").replace('"', '\\"') + '"]'
             elif isinstance(val, int):
                 ret += "[" + str(val) + "]"
         return ret
 
     @deprecation.deprecated(
-            deprecated_in="0.3.0", 
-            current_version=__version__,
-            details="Use append_output(value) instead.")
+        deprecated_in="0.3.0",
+        current_version=__version__,
+        details="Use append_output(value) instead.",
+    )
     def write_output(self, value):
         """Writes the value to the task's output."""
         val = json.dumps(value, separators=(",", ":"))
         self.__chunk_print(f"airplane_output {val}")
 
     @deprecation.deprecated(
-            deprecated_in="0.3.0",
-            current_version=__version__,
-            details="Use append_output(value, name) instead.")
+        deprecated_in="0.3.0",
+        current_version=__version__,
+        details="Use append_output(value, name) instead.",
+    )
     def write_named_output(self, name, value):
         """Writes the value to the task's output, tagged by the key."""
         val = json.dumps(value, separators=(",", ":"))
-        self.__chunk_print(f"airplane_output:\"{name}\" {val}")
+        self.__chunk_print(f'airplane_output:"{name}" {val}')
 
-    def __chunk_print(self, output):
-        CHUNK_SIZE = 8192
-        if len(output) <= CHUNK_SIZE:
+    @classmethod
+    def __chunk_print(cls, output):
+        chunk_size = 8192
+        if len(output) <= chunk_size:
             print(output)
         else:
             chunk_key = str(uuid.uuid4())
-            for i in range(0, len(output), CHUNK_SIZE):
-                print(f"airplane_chunk:{chunk_key} {output[i:i+CHUNK_SIZE]}")
+            for i in range(0, len(output), chunk_size):
+                print(f"airplane_chunk:{chunk_key} {output[i:i+chunk_size]}")
             print(f"airplane_chunk_end:{chunk_key}")
 
-    def run(self, task_id, parameters, env={}, constraints={}):
+    def run(self, task_id, parameters, env=None, constraints=None):
         """Triggers an Airplane task with the provided arguments."""
         self.__require_runtime()
 
@@ -88,8 +92,8 @@ class Airplane:
             json={
                 "taskID": task_id,
                 "params": parameters,
-                "env": env,
-                "constraints": constraints,
+                "env": env or {},
+                "constraints": constraints or {},
             },
             headers={
                 "X-Airplane-Token": self._api_token,
@@ -103,7 +107,8 @@ class Airplane:
 
         return self.__wait(run_id)
 
-    def __check_resp(self, resp):
+    @classmethod
+    def __check_resp(cls, resp):
         if resp.status_code >= 400:
             raise HTTPError(resp.json()["error"])
 
@@ -112,7 +117,8 @@ class Airplane:
         if self._api_host is None or self._api_token is None:
             raise InvalidEnvironmentException()
 
-    def __backoff():
+    @classmethod
+    def __backoff(cls):
         yield from backoff.expo(factor=0.1, max_value=5)
 
     @backoff.on_exception(
