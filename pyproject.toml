@@ -20,9 +20,11 @@ deprecation = "^2.1.0"
 typed-ast = "^1.5.4"
 
 [tool.poetry.dev-dependencies]
+pre-commit = "2.17.0"
 black = "22.3.0"
 pylint = "2.13.9"
-pre-commit = "2.17.0"
+mypy = "0.960"
+types-requests = "^2.27.29"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

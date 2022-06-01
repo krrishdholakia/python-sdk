@@ -1,24 +1,32 @@
 import json
 import re
 import uuid
+from typing import Any, Dict, Iterable, Optional, Union
 
 import backoff
 import deprecation
 import requests
+from requests import Response
 from requests.models import HTTPError
 
-from . import __version__  # pylint: disable=cyclic-import
+from airplane import __version__  # pylint: disable=cyclic-import
+
 from .exceptions import InvalidEnvironmentException, RunPendingException
 
 
 class Airplane:
     """Client SDK for Airplane tasks."""
 
-    def __init__(self, api_host, api_token):
+    CHUNK_SIZE = 8192
+
+    _api_host: Optional[str]
+    _api_token: Optional[str]
+
+    def __init__(self, api_host: Optional[str], api_token: Optional[str]) -> None:
         self._api_host = api_host
         self._api_token = api_token
 
-    def set_output(self, value, *path):
+    def set_output(self, value: Any, *path: Union[str, int]) -> None:
         """Sets the task output. Optionally takes a JSON path which can be used
         to set a subpath of the output.
         """
@@ -27,7 +35,7 @@ class Airplane:
         maybe_path = "" if js_path == "" else f":{js_path}"
         self.__chunk_print(f"airplane_output_set{maybe_path} {val}")
 
-    def append_output(self, value, *path):
+    def append_output(self, value: Any, *path: Union[str, int]) -> None:
         """Appends to an array in the task output. Optionally takes a JSON path
         which can be used to append to a subpath of the output.
         """
@@ -37,8 +45,8 @@ class Airplane:
         self.__chunk_print(f"airplane_output_append{maybe_path} {val}")
 
     @classmethod
-    def __to_js_path(cls, path):
-        ret = ""
+    def __to_js_path(cls, path: Iterable[Union[str, int]]) -> str:
+        ret: str = ""
         for i, val in enumerate(path):
             if isinstance(val, str):
                 if re.search(r"^\w+$", val) is not None:
@@ -56,7 +64,7 @@ class Airplane:
         current_version=__version__,
         details="Use append_output(value) instead.",
     )
-    def write_output(self, value):
+    def write_output(self, value: Any) -> None:
         """Writes the value to the task's output."""
         val = json.dumps(value, separators=(",", ":"))
         self.__chunk_print(f"airplane_output {val}")
@@ -66,25 +74,31 @@ class Airplane:
         current_version=__version__,
         details="Use append_output(value, name) instead.",
     )
-    def write_named_output(self, name, value):
+    def write_named_output(self, name: str, value: Any) -> None:
         """Writes the value to the task's output, tagged by the key."""
         val = json.dumps(value, separators=(",", ":"))
         self.__chunk_print(f'airplane_output:"{name}" {val}')
 
     @classmethod
-    def __chunk_print(cls, output):
-        chunk_size = 8192
-        if len(output) <= chunk_size:
+    def __chunk_print(cls, output: str) -> None:
+        if len(output) <= cls.CHUNK_SIZE:
             print(output)
         else:
             chunk_key = str(uuid.uuid4())
-            for i in range(0, len(output), chunk_size):
-                print(f"airplane_chunk:{chunk_key} {output[i:i+chunk_size]}")
+            for i in range(0, len(output), cls.CHUNK_SIZE):
+                print(f"airplane_chunk:{chunk_key} {output[i:i+cls.CHUNK_SIZE]}")
             print(f"airplane_chunk_end:{chunk_key}")
 
-    def run(self, task_id, parameters, env=None, constraints=None):
+    def run(
+        self,
+        task_id: str,
+        parameters: Optional[Dict[str, Any]] = None,
+        env: Optional[Dict[str, Any]] = None,
+        constraints: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Triggers an Airplane task with the provided arguments."""
-        self.__require_runtime()
+        if self._api_host is None or self._api_token is None:
+            raise InvalidEnvironmentException()
 
         # Boot the new task:
         resp = requests.post(
@@ -103,22 +117,17 @@ class Airplane:
         )
         self.__check_resp(resp)
         body = resp.json()
-        run_id = body["runID"]
+        run_id: str = body["runID"]
 
         return self.__wait(run_id)
 
     @classmethod
-    def __check_resp(cls, resp):
+    def __check_resp(cls, resp: Response) -> None:
         if resp.status_code >= 400:
             raise HTTPError(resp.json()["error"])
 
-    def __require_runtime(self):
-        """Ensures that the current task is running inside of an Airplane task."""
-        if self._api_host is None or self._api_token is None:
-            raise InvalidEnvironmentException()
-
     @classmethod
-    def __backoff(cls):
+    def __backoff(cls) -> Iterable[float]:
         yield from backoff.expo(factor=0.1, max_value=5)
 
     @backoff.on_exception(
@@ -130,7 +139,10 @@ class Airplane:
         ),
         max_tries=1000,
     )
-    def __wait(self, run_id):
+    def __wait(self, run_id: str) -> Dict[str, Any]:
+        if self._api_host is None or self._api_token is None:
+            raise InvalidEnvironmentException()
+
         resp = requests.get(
             f"{self._api_host}/v0/runs/get",
             params={"id": run_id},
@@ -142,7 +154,7 @@ class Airplane:
         )
         self.__check_resp(resp)
         body = resp.json()
-        run_status = body["status"]
+        run_status: str = body["status"]
 
         if run_status in ("NotStarted", "Queued", "Active"):
             # Retry...

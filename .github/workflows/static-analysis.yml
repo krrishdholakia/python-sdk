@@ -1,0 +1,23 @@
+name: static-analysis
+
+on: [push]
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.7
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+      - name: Install dependencies
+        run: poetry install
+      - name: Run black
+        run: poetry run python -m black --check .
+      - name: Run pylint
+        run: poetry run python -m pylint ./airplane
+      - name: Run mypy
+        run: poetry run python -m mypy .
