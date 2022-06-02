@@ -1,33 +1,23 @@
 """airplane - An SDK for writing Airplane tasks in Python"""
 
 __version__ = "0.3.2"
-__all__ = ["Airplane"]
 
 import os
-from typing import Any, Callable, Dict, Optional, Union
+from functools import lru_cache
+from typing import Any, Dict, Optional
 
+import backoff
 import deprecation
+import requests
 
-from airplane.client import Airplane
-
-DEFAULT_CLIENT = None
-
-_api_host = os.getenv("AIRPLANE_API_HOST")
-_api_token = os.getenv("AIRPLANE_TOKEN")
-
-
-def set_output(value: Any, *path: Union[str, int]) -> None:
-    """Sets the task output. Optionally takes a JSON path which can be used
-    to set a subpath
-    """
-    return _proxy("set_output", value, *path)
-
-
-def append_output(value: Any, *path: Union[str, int]) -> None:
-    """Appends to an array in the task output. Optionally takes a JSON path
-    which can be used to append to a subpath
-    """
-    return _proxy("append_output", value, *path)
+from airplane.client import APIClient
+from airplane.exceptions import InvalidEnvironmentException, RunPendingException
+from airplane.output import (
+    append_output,
+    deprecated_write_named_output as __deprecated_write_named_output,
+    deprecated_write_output as __deprecated_write_output,
+    set_output,
+)
 
 
 @deprecation.deprecated(
@@ -37,7 +27,7 @@ def append_output(value: Any, *path: Union[str, int]) -> None:
 )
 def write_output(value: Any) -> None:
     """Writes the value to the task's output."""
-    return _proxy("write_output", value)
+    return __deprecated_write_output(value)
 
 
 @deprecation.deprecated(
@@ -47,7 +37,7 @@ def write_output(value: Any) -> None:
 )
 def write_named_output(name: str, value: Any) -> None:
     """Writes the value to the task's output, tagged by the key."""
-    return _proxy("write_named_output", name, value)
+    return __deprecated_write_named_output(name, value)
 
 
 def run(
@@ -57,13 +47,38 @@ def run(
     constraints: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Triggers an Airplane task with the provided arguments."""
-    return _proxy("run", task_id, parameters, env=env, constraints=constraints)
+    client = api_client_from_env()
+    run_id = client.create_run(task_id, parameters, env, constraints)
+    run_status = __wait_for_run_completion(run_id)
+    outputs = client.get_run_outputs(run_id)
+    return {"status": run_status, "outputs": outputs}
 
 
-def _proxy(method: str, *args: Any, **kwargs: Any) -> Any:
-    global DEFAULT_CLIENT  # pylint: disable=global-statement
-    if not DEFAULT_CLIENT:
-        DEFAULT_CLIENT = Airplane(_api_host, _api_token)
+@backoff.on_exception(
+    backoff.expo(factor=0.1, max_value=5),
+    (
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+        RunPendingException,
+    ),
+    max_tries=1000,
+)
+def __wait_for_run_completion(run_id: str) -> str:
+    client = api_client_from_env()
+    run_status = client.get_run_status(run_id)
+    if run_status in ("NotStarted", "Queued", "Active"):
+        raise RunPendingException()
+    return run_status
 
-    func: Callable[..., Any] = getattr(DEFAULT_CLIENT, method)
-    return func(*args, **kwargs)
+
+def api_client_from_env() -> APIClient:
+    api_host = os.getenv("AIRPLANE_API_HOST")
+    api_token = os.getenv("AIRPLANE_TOKEN")
+    if api_host is None or api_token is None:
+        raise InvalidEnvironmentException()
+    return api_client(api_host, api_token)
+
+
+@lru_cache(maxsize=None)
+def api_client(api_host: str, api_token: str) -> APIClient:
+    return APIClient(api_host, api_token, __version__)
