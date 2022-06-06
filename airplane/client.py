@@ -38,17 +38,30 @@ class APIClient:
         self.__maybe_error_on_response(resp)
         return resp.json()["runID"]
 
-    def get_run_status(self, run_id: str) -> str:
-        """Gets the status of an Airplane task run."""
+    def execute_task(self, slug: str, param_values: Optional[Dict[str, Any]]) -> str:
+        """Triggers an Airplane task and returns the run id."""
+        resp = requests.post(
+            f"{self._api_host}/v0/tasks/execute",
+            json={
+                "slug": slug,
+                "paramValues": param_values or {},
+            },
+            headers=self._headers,
+        )
+        self.__maybe_error_on_response(resp)
+        return resp.json()["runID"]
+
+    def get_run(self, run_id: str) -> Dict[str, Any]:
+        """Fetches an Airplane task run."""
         resp = requests.get(
             f"{self._api_host}/v0/runs/get",
             params={"id": run_id},
             headers=self._headers,
         )
         self.__maybe_error_on_response(resp)
-        return resp.json()["status"]
+        return resp.json()
 
-    def get_run_outputs(self, run_id: str) -> Any:
+    def get_run_output(self, run_id: str) -> Any:
         """Gets the outputs of an Airplane task run."""
         resp = requests.get(
             f"{self._api_host}/v0/runs/getOutputs",

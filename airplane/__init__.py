@@ -1,6 +1,6 @@
 """airplane - An SDK for writing Airplane tasks in Python"""
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 import os
 from functools import lru_cache
@@ -40,6 +40,11 @@ def write_named_output(name: str, value: Any) -> None:
     return __deprecated_write_named_output(name, value)
 
 
+@deprecation.deprecated(
+    deprecated_in="0.3.2",
+    current_version=__version__,
+    details="Use execute(task_slug, paramValues) instead.",
+)
 def run(
     task_id: str,
     parameters: Optional[Dict[str, Any]] = None,
@@ -49,26 +54,40 @@ def run(
     """Triggers an Airplane task with the provided arguments."""
     client = api_client_from_env()
     run_id = client.create_run(task_id, parameters, env, constraints)
-    run_status = __wait_for_run_completion(run_id)
-    outputs = client.get_run_outputs(run_id)
-    return {"status": run_status, "outputs": outputs}
+    run_info = __wait_for_run_completion(run_id)
+    outputs = client.get_run_output(run_id)
+    return {"status": run_info["status"], "outputs": outputs}
+
+
+def execute(slug: str, param_values: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Triggers an Airplane task with the provided arguments."""
+    client = api_client_from_env()
+    run_id = client.execute_task(slug, param_values)
+    run_info = __wait_for_run_completion(run_id)
+    outputs = client.get_run_output(run_id)
+    return {
+        "id": run_info["id"],
+        "taskID": run_info["taskID"],
+        "paramValues": run_info["paramValues"],
+        "status": run_info["status"],
+        "output": outputs,
+    }
 
 
 @backoff.on_exception(
-    backoff.expo(factor=0.1, max_value=5),
+    lambda: backoff.expo(factor=0.1, max_value=5),
     (
         requests.exceptions.ConnectionError,
         requests.exceptions.Timeout,
         RunPendingException,
     ),
-    max_tries=1000,
 )
-def __wait_for_run_completion(run_id: str) -> str:
+def __wait_for_run_completion(run_id: str) -> Dict[str, Any]:
     client = api_client_from_env()
-    run_status = client.get_run_status(run_id)
-    if run_status in ("NotStarted", "Queued", "Active"):
+    run_info = client.get_run(run_id)
+    if run_info["status"] in ("NotStarted", "Queued", "Active"):
         raise RunPendingException()
-    return run_status
+    return run_info
 
 
 def api_client_from_env() -> APIClient:
