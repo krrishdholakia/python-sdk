@@ -9,12 +9,13 @@ class APIClient:
     _api_host: str
     _headers: Dict[str, str]
 
-    def __init__(self, api_host: str, api_token: str, version: str):
+    def __init__(self, api_host: str, api_token: str, env_id: str, version: str):
         self._api_host = api_host
         self._headers = {
             "X-Airplane-Token": api_token,
             "X-Airplane-Client-Kind": "sdk/python",
             "X-Airplane-Client-Version": version,
+            "X-Airplane-Env-ID": env_id,
         }
 
     def create_run(

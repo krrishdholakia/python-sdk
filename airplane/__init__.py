@@ -93,11 +93,12 @@ def __wait_for_run_completion(run_id: str) -> Dict[str, Any]:
 def api_client_from_env() -> APIClient:
     api_host = os.getenv("AIRPLANE_API_HOST")
     api_token = os.getenv("AIRPLANE_TOKEN")
-    if api_host is None or api_token is None:
+    env_id = os.getenv("AIRPLANE_ENV_ID")
+    if any(x is None for x in [api_host, api_token, env_id]):
         raise InvalidEnvironmentException()
-    return api_client(api_host, api_token)
+    return api_client(api_host, api_token, env_id)
 
 
 @lru_cache(maxsize=None)
-def api_client(api_host: str, api_token: str) -> APIClient:
-    return APIClient(api_host, api_token, __version__)
+def api_client(api_host: str, api_token: str, env_id: str) -> APIClient:
+    return APIClient(api_host, api_token, env_id, __version__)
