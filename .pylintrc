@@ -1,0 +1,21 @@
+[MASTER]
+load-plugins = pylint.extensions.docparams, pylint.extensions.docstyle
+
+[MESSAGES CONTROL]
+disable = missing-module-docstring,
+          raw-checker-failed,
+          bad-inline-option,
+          locally-disabled,
+          file-ignored,
+          suppressed-message,
+          deprecated-pragma,
+          use-symbolic-message-instead,
+          duplicate-code,
+          too-few-public-methods,
+          too-many-arguments,
+          attribute-defined-outside-init,
+          logging-fstring-interpolation,
+          unspecified-encoding,
+          too-many-instance-attributes,
+          too-many-branches
+good-names=db
