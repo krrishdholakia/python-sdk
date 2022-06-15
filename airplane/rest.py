@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, Optional, Union
 
-from airplane.execute import __execute_internal
+from airplane.execute import Run, __execute_internal
 
 
 class Method(Enum):
@@ -33,7 +33,7 @@ def request(
     body_type: BodyType = BodyType.UNKNOWN,
     body: Optional[Union[Dict[str, Any], str]] = None,
     form_data: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the builtin request function against a REST Airplane resource.
 
     Args:

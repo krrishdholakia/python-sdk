@@ -73,7 +73,7 @@ class APIClient:
             resources: Optional map of resource aliases to ids.
 
         Returns:
-            str: The id of the run.
+            The id of the run.
 
         Raises:
             HTTPError: If the run cannot be executed.
@@ -97,7 +97,7 @@ class APIClient:
             run_id: The id of the run to fetch.
 
         Returns:
-            map: The Airplane run's attributes.
+            The Airplane run's attributes.
 
         Raises:
             HTTPError: If the run cannot be fetched.
@@ -117,7 +117,7 @@ class APIClient:
             run_id: The id of the run for which to fetch output.
 
         Returns:
-            obj: The Airplane run's outputs.
+            The Airplane run's outputs.
 
         Raises:
             HTTPError: If the run outputs cannot be fetched.

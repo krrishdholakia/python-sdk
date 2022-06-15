@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from airplane.execute import __execute_internal
+from airplane.execute import Run, __execute_internal
 
 
 def find(
@@ -11,7 +11,7 @@ def find(
     sort: Optional[Dict[str, Any]] = None,
     skip: Optional[int] = None,
     limit: Optional[int] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the find function against a MongoDB Airplane resource.
 
     Args:
@@ -50,7 +50,7 @@ def find_one(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the findOne function against a MongoDB Airplane resource.
 
     Args:
@@ -85,7 +85,7 @@ def find_one_and_delete(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the findOneAndDelete function against a MongoDB Airplane resource.
 
     Args:
@@ -121,7 +121,7 @@ def find_one_and_update(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the findOneAndUpdate function against a MongoDB Airplane resource.
 
     Args:
@@ -160,7 +160,7 @@ def find_one_and_replace(
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
     upsert: Optional[bool] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the findOneAndReplace function against a MongoDB Airplane resource.
 
     Args:
@@ -197,7 +197,7 @@ def insert_one(
     mongodb_resource_id: str,
     collection: str,
     document: Dict[str, Any],
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the insertOne function against a MongoDB Airplane resource.
 
     Args:
@@ -226,7 +226,7 @@ def insert_many(
     mongodb_resource_id: str,
     collection: str,
     documents: List[Dict[str, Any]],
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the insertMany function against a MongoDB Airplane resource.
 
     Args:
@@ -257,7 +257,7 @@ def update_one(
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     upsert: Optional[bool] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the updateOne function against a MongoDB Airplane resource.
 
     Args:
@@ -292,7 +292,7 @@ def update_many(
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     upsert: Optional[bool] = None,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the updateMany function against a MongoDB Airplane resource.
 
     Args:
@@ -325,7 +325,7 @@ def delete_one(
     mongodb_resource_id: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the deleteOne function against a MongoDB Airplane resource.
 
     Args:
@@ -354,7 +354,7 @@ def delete_many(
     mongodb_resource_id: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the deleteMany function against a MongoDB Airplane resource.
 
     Args:
@@ -383,7 +383,7 @@ def aggregate(
     mongodb_resource_id: str,
     collection: str,
     pipeline: List[Dict[str, Any]],
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the aggregate function against a MongoDB Airplane resource.
 
     Args:
@@ -412,7 +412,7 @@ def count_documents(
     mongodb_resource_id: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the countDocuments function against a MongoDB Airplane resource.
 
     Args:
@@ -442,7 +442,7 @@ def distinct(
     collection: str,
     field: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the distinct function against a MongoDB Airplane resource.
 
     Args:

@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass, is_dataclass
-from typing import Any, Dict, List, Union
+from typing import List, Union
 
-from airplane.execute import __execute_internal
+from airplane.execute import Run, __execute_internal
 
 
 @dataclass
@@ -23,7 +23,7 @@ def message(
     recipients: Union[List[Contact], List[str]],
     subject: str = "",
     message: str = "",  # pylint: disable=redefined-outer-name
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the builtin message function against an email Airplane resource.
 
     Args:

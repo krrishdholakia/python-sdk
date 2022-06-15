@@ -18,4 +18,4 @@ disable = missing-module-docstring,
           unspecified-encoding,
           too-many-instance-attributes,
           too-many-branches
-good-names=db
+good-names=db,id

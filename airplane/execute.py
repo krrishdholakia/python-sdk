@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from enum import Enum
 from typing import Any, Dict, Optional
 
 import backoff
@@ -7,6 +9,36 @@ import requests
 from airplane._version import __version__
 from airplane.client import api_client_from_env
 from airplane.exceptions import RunPendingException
+
+
+class RunStatus(Enum):
+    """Valid statused during a run's lifecycle."""
+
+    NOT_STARTED = "NotStarted"
+    QUEUED = "Queued"
+    ACTIVE = "Active"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELLED = "Cancelled"
+
+
+@dataclass
+class Run:
+    """Representation of an Airplane run.
+
+    Attributes:
+        id: The id of the run.
+        task id: The task id associated with the run.
+        param_values: The param values the run was provided.
+        status: The current status of the run.
+        output: The outputs (if any) of the run.
+    """
+
+    id: str
+    task_id: str
+    param_values: Dict[str, Any]
+    status: RunStatus
+    output: Any
 
 
 @deprecation.deprecated(
@@ -41,7 +73,7 @@ def run(
     return {"status": run_info["status"], "outputs": outputs}
 
 
-def execute(slug: str, param_values: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def execute(slug: str, param_values: Optional[Dict[str, Any]] = None) -> Run:
     """Executes an Airplane task, waits for execution, and returns run metadata.
 
     Args:
@@ -61,18 +93,23 @@ def __execute_internal(
     slug: str,
     param_values: Optional[Dict[str, Any]] = None,
     resources: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+) -> Run:
     client = api_client_from_env()
     run_id = client.execute_task(slug, param_values, resources)
     run_info = __wait_for_run_completion(run_id)
     outputs = client.get_run_output(run_id)
-    return {
-        "id": run_info["id"],
-        "task_id": run_info["taskID"],
-        "param_values": run_info["paramValues"],
-        "status": run_info["status"],
-        "output": outputs,
-    }
+
+    run_param_values = run_info["paramValues"]
+    if run_info["isStdAPI"]:
+        run_param_values = run_info["stdAPIRequest"]["request"]
+
+    return Run(
+        id=run_info["id"],
+        task_id=run_info["taskID"],
+        param_values=run_param_values,
+        status=RunStatus(run_info["status"]),
+        output=outputs,
+    )
 
 
 @backoff.on_exception(

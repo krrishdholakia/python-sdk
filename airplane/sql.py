@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from airplane.execute import __execute_internal
+from airplane.execute import Run, __execute_internal
 
 
 class TransactionMode(Enum):
@@ -18,7 +18,7 @@ def query(
     query: str,  # pylint: disable=redefined-outer-name
     query_args: Optional[Dict[str, Any]] = None,
     transaction_mode: TransactionMode = TransactionMode.AUTO,
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the builtin query function against a SQL Airplane resource.
 
     Args:

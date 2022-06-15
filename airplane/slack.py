@@ -1,12 +1,10 @@
-from typing import Any, Dict
-
-from airplane.execute import __execute_internal
+from airplane.execute import Run, __execute_internal
 
 
 def message(
     channel_name: str,
     message: str,  # pylint: disable=redefined-outer-name
-) -> Dict[str, Any]:
+) -> Run:
     """Runs the builtin message function against a Slack Airplane resource.
 
     Args:
