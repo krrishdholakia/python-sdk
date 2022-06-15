@@ -34,7 +34,7 @@ def request(
     body: Optional[Union[Dict[str, Any], str]] = None,
     form_data: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Runs the builtin slack function against a Slack Airplane resource.
+    """Runs the builtin request function against a REST Airplane resource.
 
     Args:
         rest_resource_id: The id of the REST resource to use.

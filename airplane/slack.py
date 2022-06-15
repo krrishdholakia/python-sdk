@@ -7,7 +7,7 @@ def message(
     channel_name: str,
     message: str,  # pylint: disable=redefined-outer-name
 ) -> Dict[str, Any]:
-    """Runs the builtin slack function against a Slack Airplane resource.
+    """Runs the builtin message function against a Slack Airplane resource.
 
     Args:
         channel_name: The slack channel to send a message to.
