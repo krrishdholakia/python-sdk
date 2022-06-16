@@ -28,14 +28,14 @@ class Run:
 
     Attributes:
         id: The id of the run.
-        task id: The task id associated with the run.
+        task_id: The task id associated with the run (None for builtin tasks).
         param_values: The param values the run was provided.
         status: The current status of the run.
         output: The outputs (if any) of the run.
     """
 
     id: str
-    task_id: str
+    task_id: Optional[str]
     param_values: Dict[str, Any]
     status: RunStatus
     output: Any
@@ -99,14 +99,10 @@ def __execute_internal(
     run_info = __wait_for_run_completion(run_id)
     outputs = client.get_run_output(run_id)
 
-    run_param_values = run_info["paramValues"]
-    if run_info["isStdAPI"]:
-        run_param_values = run_info["stdAPIRequest"]["request"]
-
     return Run(
         id=run_info["id"],
-        task_id=run_info["taskID"],
-        param_values=run_param_values,
+        task_id=run_info.get("taskID", None),
+        param_values=run_info["paramValues"],
         status=RunStatus(run_info["status"]),
         output=outputs,
     )
