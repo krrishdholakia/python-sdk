@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Any, Dict, Optional, Union
 
-from airplane.execute import Run, __execute_internal
+from airplane.builtins import __convert_resource_alias_to_id
+from airplane.runtime import Run, __execute_internal
 
 
 class Method(Enum):
@@ -25,7 +26,7 @@ class BodyType(Enum):
 
 
 def request(
-    rest_resource_id: str,
+    rest_resource: str,
     method: Method,
     path: str,
     headers: Optional[Dict[str, Any]] = None,
@@ -37,7 +38,7 @@ def request(
     """Runs the builtin request function against a REST Airplane resource.
 
     Args:
-        rest_resource_id: The id of the REST resource to use.
+        rest_resource: The alias of the REST resource to use.
         method: The HTTP method of the request.
         path: The path of the request.
         headers: Optional headers to include in the request.
@@ -64,5 +65,5 @@ def request(
             "body": body,
             "formData": form_data,
         },
-        {"rest": rest_resource_id},
+        {"rest": __convert_resource_alias_to_id(rest_resource)},
     )

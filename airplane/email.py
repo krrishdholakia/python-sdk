@@ -1,7 +1,8 @@
 from dataclasses import asdict, dataclass, is_dataclass
 from typing import List, Union
 
-from airplane.execute import Run, __execute_internal
+from airplane.builtins import __convert_resource_alias_to_id
+from airplane.runtime import Run, __execute_internal
 
 
 @dataclass
@@ -18,7 +19,7 @@ class Contact:
 
 
 def message(
-    email_resource_id: str,
+    email_resource: str,
     sender: Contact,
     recipients: Union[List[Contact], List[str]],
     subject: str = "",
@@ -27,7 +28,7 @@ def message(
     """Runs the builtin message function against an email Airplane resource.
 
     Args:
-        email_resource_id: The id of the email resource to send the email with.
+        email_resource: The alias of the email resource to send the email with.
         sender: The email's sender information.
         recipients: List of the email's recipients.
         subject: The subject of the email.
@@ -51,5 +52,5 @@ def message(
             "subject": subject,
             "message": message,
         },
-        {"email": email_resource_id},
+        {"email": __convert_resource_alias_to_id(email_resource)},
     )

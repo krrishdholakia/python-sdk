@@ -1,10 +1,11 @@
 from typing import Any, Dict, List, Optional
 
-from airplane.execute import Run, __execute_internal
+from airplane.builtins import __convert_resource_alias_to_id
+from airplane.runtime import Run, __execute_internal
 
 
 def find(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
@@ -15,7 +16,7 @@ def find(
     """Runs the find function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to search in.
         filter: The query predicate.
         projection: The projection specification that determines which fields to return.
@@ -40,12 +41,12 @@ def find(
             "skip": skip,
             "limit": limit,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def find_one(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
@@ -54,7 +55,7 @@ def find_one(
     """Runs the findOne function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to search.
         filter: The query predicate.
         projection: The projection specification that determines which fields to return.
@@ -75,12 +76,12 @@ def find_one(
             "projection": projection,
             "sort": sort,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def find_one_and_delete(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
@@ -89,7 +90,7 @@ def find_one_and_delete(
     """Runs the findOneAndDelete function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to search in.
         filter: The query predicate.
         projection: The projection specification that determines which fields to return.
@@ -110,12 +111,12 @@ def find_one_and_delete(
             "projection": projection,
             "sort": sort,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def find_one_and_update(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
@@ -125,7 +126,7 @@ def find_one_and_update(
     """Runs the findOneAndUpdate function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to search in.
         update: The update document.
         filter: The query predicate.
@@ -148,12 +149,12 @@ def find_one_and_update(
             "projection": projection,
             "sort": sort,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def find_one_and_replace(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     replacement: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
@@ -164,7 +165,7 @@ def find_one_and_replace(
     """Runs the findOneAndReplace function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to search in.
         replacement: The replacement document.
         filter: The query predicate.
@@ -189,19 +190,19 @@ def find_one_and_replace(
             "sort": sort,
             "upsert": upsert,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def insert_one(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     document: Dict[str, Any],
 ) -> Run:
     """Runs the insertOne function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to insert in.
         document: The document to insert.
 
@@ -218,19 +219,19 @@ def insert_one(
             "collection": collection,
             "document": document,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def insert_many(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     documents: List[Dict[str, Any]],
 ) -> Run:
     """Runs the insertMany function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to insert in.
         documents: The documents to insert.
 
@@ -247,12 +248,12 @@ def insert_many(
             "collection": collection,
             "documents": documents,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def update_one(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
@@ -261,7 +262,7 @@ def update_one(
     """Runs the updateOne function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to update in.
         update: The update document.
         filter: The query predicate.
@@ -282,12 +283,12 @@ def update_one(
             "filter": filter,
             "upsert": upsert,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def update_many(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
@@ -296,7 +297,7 @@ def update_many(
     """Runs the updateMany function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to update in.
         update: The update document.
         filter: The query predicate.
@@ -317,19 +318,19 @@ def update_many(
             "filter": filter,
             "upsert": upsert,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def delete_one(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
 ) -> Run:
     """Runs the deleteOne function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to delete in.
         filter: The query predicate.
 
@@ -346,19 +347,19 @@ def delete_one(
             "collection": collection,
             "filter": filter,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def delete_many(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
 ) -> Run:
     """Runs the deleteMany function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to delete in.
         filter: The query predicate.
 
@@ -375,19 +376,19 @@ def delete_many(
             "collection": collection,
             "filter": filter,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def aggregate(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     pipeline: List[Dict[str, Any]],
 ) -> Run:
     """Runs the aggregate function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to aggregate in.
         pipeline: The sequence of data aggregation operations.
 
@@ -404,19 +405,19 @@ def aggregate(
             "collection": collection,
             "pipeline": pipeline,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def count_documents(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
 ) -> Run:
     """Runs the countDocuments function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to count in.
         filter: The query predicate.
 
@@ -433,12 +434,12 @@ def count_documents(
             "collection": collection,
             "filter": filter,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
 
 
 def distinct(
-    mongodb_resource_id: str,
+    mongodb_resource: str,
     collection: str,
     field: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
@@ -446,7 +447,7 @@ def distinct(
     """Runs the distinct function against a MongoDB Airplane resource.
 
     Args:
-        mongodb_resource_id: The id of the MongoDB resource to use.
+        mongodb_resource: The alias of the MongoDB resource to use.
         collection: The collection to search.
         field: The field for which to return distinct values.
         filter: The query predicate.
@@ -465,5 +466,5 @@ def distinct(
             "field": field,
             "filter": filter,
         },
-        {"db": mongodb_resource_id},
+        {"db": __convert_resource_alias_to_id(mongodb_resource)},
     )
