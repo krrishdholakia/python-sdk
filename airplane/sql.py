@@ -33,6 +33,7 @@ def query(
 
     Raises:
         HTTPError: If the query builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(

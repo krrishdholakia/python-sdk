@@ -29,6 +29,7 @@ def find(
 
     Raises:
         HTTPError: If the find builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -66,6 +67,7 @@ def find_one(
 
     Raises:
         HTTPError: If the findOne builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -101,6 +103,7 @@ def find_one_and_delete(
 
     Raises:
         HTTPError: If the findOneAndDelete builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -138,6 +141,7 @@ def find_one_and_update(
 
     Raises:
         HTTPError: If the findOneAndUpdate builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -178,6 +182,7 @@ def find_one_and_replace(
 
     Raises:
         HTTPError: If the findOneAndReplace builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -211,6 +216,7 @@ def insert_one(
 
     Raises:
         HTTPError: If the insertOne builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -240,6 +246,7 @@ def insert_many(
 
     Raises:
         HTTPError: If the insertMany builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -273,6 +280,7 @@ def update_one(
 
     Raises:
         HTTPError: If the updateOne builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -308,6 +316,7 @@ def update_many(
 
     Raises:
         HTTPError: If the updateMany builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -339,6 +348,7 @@ def delete_one(
 
     Raises:
         HTTPError: If the deleteOne builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -368,6 +378,7 @@ def delete_many(
 
     Raises:
         HTTPError: If the deleteMany builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -397,6 +408,7 @@ def aggregate(
 
     Raises:
         HTTPError: If the aggregate builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -426,6 +438,7 @@ def count_documents(
 
     Raises:
         HTTPError: If the countDocuments builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
@@ -457,6 +470,7 @@ def distinct(
 
     Raises:
         HTTPError: If the distinct builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(

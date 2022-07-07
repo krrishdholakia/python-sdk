@@ -23,6 +23,7 @@ def __convert_resource_alias_to_id(alias: str) -> str:
     Raises:
         InvalidEnvironmentException: If the environment does not contain resources information.
         UnknownResourceAliasException: If the resource alias cannot be found or converted.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     resources_version = os.environ.get(__AIRPLANE_RESOURCES_VERSION_ENV_VAR, "")

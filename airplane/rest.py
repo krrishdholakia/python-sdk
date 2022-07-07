@@ -52,6 +52,7 @@ def request(
 
     Raises:
         HTTPError: If the request builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(

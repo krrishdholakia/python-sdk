@@ -12,7 +12,7 @@ from airplane.exceptions import RunPendingException
 
 
 class RunStatus(Enum):
-    """Valid statused during a run's lifecycle."""
+    """Valid statuses during a run's lifecycle."""
 
     NOT_STARTED = "NotStarted"
     QUEUED = "Queued"
@@ -85,6 +85,7 @@ def execute(slug: str, param_values: Optional[Dict[str, Any]] = None) -> Run:
 
     Raises:
         HTTPError: If the task cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
     return __execute_internal(slug, param_values)
 
@@ -98,14 +99,19 @@ def __execute_internal(
     run_id = client.execute_task(slug, param_values, resources)
     run_info = __wait_for_run_completion(run_id)
     outputs = client.get_run_output(run_id)
-
-    return Run(
+    # pylint: disable=redefined-outer-name
+    run = Run(
         id=run_info["id"],
         task_id=run_info.get("taskID", None),
         param_values=run_info["paramValues"],
         status=RunStatus(run_info["status"]),
         output=outputs,
     )
+
+    if run.status in (RunStatus.FAILED, RunStatus.CANCELLED):
+        raise RunTerminationException(run)
+
+    return run
 
 
 @backoff.on_exception(
@@ -122,3 +128,14 @@ def __wait_for_run_completion(run_id: str) -> Dict[str, Any]:
     if run_info["status"] in ("NotStarted", "Queued", "Active"):
         raise RunPendingException()
     return run_info
+
+
+class RunTerminationException(Exception):
+    """Exception that indicates a run failed or was cancelled."""
+
+    def __init__(self, run: Run):  # pylint: disable=redefined-outer-name
+        self.run = run
+        super().__init__()
+
+    def __str__(self) -> str:
+        return f"Run {self.run.status.value.lower()}"

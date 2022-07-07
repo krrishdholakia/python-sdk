@@ -39,6 +39,7 @@ def message(
 
     Raises:
         HTTPError: If the message builtin cannot be executed properly.
+        RunTerminationException: If the run fails or is cancelled.
     """
 
     return __execute_internal(
