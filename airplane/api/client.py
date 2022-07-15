@@ -1,4 +1,5 @@
 import os
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
@@ -10,19 +11,28 @@ from airplane._version import __version__
 from airplane.exceptions import InvalidEnvironmentException
 
 
+@dataclass
+class ClientOpts:
+    """Client options for an APIClient."""
+
+    api_host: str
+    api_token: str
+    env_id: str
+
+
 class APIClient:
     """API Client to interact with the public Airplane API."""
 
     _api_host: str
     _headers: Dict[str, str]
 
-    def __init__(self, api_host: str, api_token: str, env_id: str, version: str):
-        self._api_host = api_host
+    def __init__(self, opts: ClientOpts, version: str):
+        self._api_host = opts.api_host
         self._headers = {
-            "X-Airplane-Token": api_token,
+            "X-Airplane-Token": opts.api_token,
             "X-Airplane-Client-Kind": "sdk/python",
             "X-Airplane-Client-Version": version,
-            "X-Airplane-Env-ID": env_id,
+            "X-Airplane-Env-ID": opts.env_id,
         }
 
     def create_run(
@@ -136,6 +146,26 @@ class APIClient:
             raise HTTPError(resp.json()["error"])
 
 
+def client_opts_from_env() -> ClientOpts:
+    """Creates ClientOpts from environment variables.
+
+    Returns:
+        Unvalidated ClientOpts from environment variables.
+
+    Raises:
+         InvalidEnvironmentException: If the environment is improperly configured.
+    """
+
+    opts = ClientOpts(
+        api_host=os.getenv("AIRPLANE_API_HOST", ""),
+        api_token=os.getenv("AIRPLANE_TOKEN", ""),
+        env_id=os.getenv("AIRPLANE_ENV_ID", ""),
+    )
+    if any(not x for x in [opts.api_host, opts.api_token, opts.env_id]):
+        raise InvalidEnvironmentException()
+    return opts
+
+
 def api_client_from_env() -> APIClient:
     """Creates an APIClient from environment variables.
 
@@ -145,24 +175,17 @@ def api_client_from_env() -> APIClient:
     Raises:
         InvalidEnvironmentException: If the environment is improperly configured.
     """
-    api_host = os.getenv("AIRPLANE_API_HOST")
-    api_token = os.getenv("AIRPLANE_TOKEN")
-    env_id = os.getenv("AIRPLANE_ENV_ID")
-    if any(not x for x in [api_host, api_token, env_id]):
-        raise InvalidEnvironmentException()
-    return api_client(api_host, api_token, env_id)
+    return api_client(client_opts_from_env())
 
 
 @lru_cache(maxsize=None)
-def api_client(api_host: str, api_token: str, env_id: str) -> APIClient:
+def api_client(opts: ClientOpts) -> APIClient:
     """Creates an APIClient
 
     Args:
-        api_host: The hostname of the Airplane API.
-        api_token: The api token to pass to the API on each request.
-        env_id: The id of the environment to pass to the API on each request.
+        opts: The ClientOpts to use for the APIClient.
 
     Returns:
         An APIClient to interact with the Airplane API.
     """
-    return APIClient(api_host, api_token, env_id, __version__)
+    return APIClient(opts, __version__)

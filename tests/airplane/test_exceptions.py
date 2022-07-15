@@ -1,4 +1,5 @@
-from airplane.runtime import Run, RunStatus, RunTerminationException
+from airplane.api.types import Run, RunStatus
+from airplane.exceptions import RunTerminationException
 
 
 def test_run_termination_exception() -> None:

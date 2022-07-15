@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from airplane.api.types import Run
+
 
 class RunPendingException(Exception):
     """Exception that indicates a run is still in pending state."""
@@ -20,3 +22,13 @@ class UnknownResourceAliasException(Exception):
 
     def __str__(self) -> str:
         return f"The resource alias {self.alias} is unknown (have you attached the resource?)."
+
+
+@dataclass
+class RunTerminationException(Exception):
+    """Exception that indicates a run failed or was cancelled."""
+
+    run: Run
+
+    def __str__(self) -> str:
+        return f"Run {str(self.run.status.value).lower()}"
