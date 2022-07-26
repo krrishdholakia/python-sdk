@@ -14,6 +14,7 @@ __AIRPLANE_RUNTIME_ENV_VAR = "AIRPLANE_RUNTIME"
 class RuntimeKind(Enum):
     """Valid runtime kinds for Airplane runs."""
 
+    DEV = "dev"
     STANDARD = "standard"
     WORKFLOW = "workflow"
 
