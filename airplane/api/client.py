@@ -11,7 +11,7 @@ from airplane._version import __version__
 from airplane.exceptions import InvalidEnvironmentException
 
 
-@dataclass
+@dataclass(frozen=True)
 class ClientOpts:
     """Client options for an APIClient."""
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from airplane.api.types import Run
+from airplane.api.entities import Run
 
 
 class RunPendingException(Exception):

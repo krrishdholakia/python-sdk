@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from airplane.api.types import Run
+from airplane.api.entities import Run
 from airplane.runtime.standard import execute as standard_execute
 from airplane.runtime.workflow import execute as workflow_execute
 

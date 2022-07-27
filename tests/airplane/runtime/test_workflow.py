@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 import pytest
 
-from airplane.api.types import RunStatus
+from airplane.api.entities import RunStatus
 from airplane.runtime.workflow import SignalReceiver
 
 

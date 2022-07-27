@@ -1,4 +1,4 @@
-from airplane.api.types import Run, RunStatus
+from airplane.api.entities import Run, RunStatus
 from airplane.exceptions import RunTerminationException
 
 

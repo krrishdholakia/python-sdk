@@ -1,6 +1,6 @@
 import pytest
 
-from airplane.api.types import RunStatus
+from airplane.api.entities import RunStatus
 
 
 @pytest.mark.parametrize(

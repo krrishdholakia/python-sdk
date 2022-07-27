@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from temporalio import activity, workflow
 
 from airplane.api.client import ClientOpts, api_client, client_opts_from_env
-from airplane.api.types import Run, RunStatus
+from airplane.api.entities import Run, RunStatus
 
 
 @activity.defn
