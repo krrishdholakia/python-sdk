@@ -4,6 +4,16 @@ from airplane._version import __version__
 from airplane.api.client import APIClient
 from airplane.api.entities import Run, RunStatus
 from airplane.builtins import email, mongodb, rest, slack, sql
+from airplane.config.config import task, workflow
+from airplane.config.types import (
+    SQL,
+    ConfigVar,
+    File,
+    LongText,
+    ParamConfig,
+    Resource,
+    Schedule,
+)
 from airplane.exceptions import InvalidEnvironmentException, RunPendingException
 from airplane.output import append_output, set_output, write_named_output, write_output
 from airplane.runtime import execute
