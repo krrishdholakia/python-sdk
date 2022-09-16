@@ -135,7 +135,7 @@ def test_call(mocked_post: mock.MagicMock, mocked_get: mock.MagicMock) -> None:
         headers={
             "X-Airplane-Token": "foo_token",
             "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": "0.3.8",
+            "X-Airplane-Client-Version": "0.3.9",
             "X-Airplane-Env-ID": "foo_env",
         },
     )
