@@ -1,3 +1,4 @@
+import textwrap
 from enum import Enum
 from typing import Any, Dict, Optional
 
@@ -19,6 +20,7 @@ def query(
     query: str,  # pylint: disable=redefined-outer-name
     query_args: Optional[Dict[str, Any]] = None,
     transaction_mode: TransactionMode = TransactionMode.AUTO,
+    dedent: bool = True,
 ) -> Run:
     """Runs the builtin query function against a SQL Airplane resource.
 
@@ -27,6 +29,7 @@ def query(
         query: The query to run on the SQL resource.
         query_args: Optional map of query arg names to values to insert into the query.
         transaction_mode: Optional transaction mode with which to run the query.
+        dedent: Whether or not to omit leading whitespace from `query`.
 
     Returns:
         The id, task id, param values, status and outputs of the executed run.
@@ -35,7 +38,8 @@ def query(
         HTTPError: If the query builtin cannot be executed properly.
         RunTerminationException: If the run fails or is cancelled.
     """
-
+    if dedent:
+        query = textwrap.dedent(query)
     return __execute_internal(
         "airplane:sql_query",
         {

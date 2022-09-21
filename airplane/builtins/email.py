@@ -1,3 +1,4 @@
+import textwrap
 from dataclasses import asdict, dataclass, is_dataclass
 from typing import List, Union
 
@@ -24,6 +25,7 @@ def message(
     recipients: Union[List[Contact], List[str]],
     subject: str = "",
     message: str = "",  # pylint: disable=redefined-outer-name
+    dedent: bool = True,
 ) -> Run:
     """Runs the builtin message function against an email Airplane resource.
 
@@ -33,6 +35,7 @@ def message(
         recipients: List of the email's recipients.
         subject: The subject of the email.
         message: The message body of the email.
+        dedent: Whether or not to omit leading whitespace from `message`.
 
     Returns:
         The id, task id, param values, status and outputs of the executed run.
@@ -41,7 +44,8 @@ def message(
         HTTPError: If the message builtin cannot be executed properly.
         RunTerminationException: If the run fails or is cancelled.
     """
-
+    if dedent:
+        message = textwrap.dedent(message)
     return __execute_internal(
         "airplane:email_message",
         {
