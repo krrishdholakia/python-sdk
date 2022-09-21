@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from requests import Response
@@ -139,6 +139,74 @@ class APIClient:
         )
         self.__maybe_error_on_response(resp)
         return resp.json()["output"]
+
+    def create_markdown_display(self, content: str) -> str:
+        """Creates a markdown display.
+
+        Args:
+            content: Content to display
+
+        Returns:
+            The Airplane display's id.
+
+        Raises:
+            HTTPError: If the display could not be created.
+        """
+        resp = requests.post(
+            f"{self._api_host}/v0/displays/create",
+            json={"display": {"content": content, "kind": "markdown"}},
+            headers=self._headers,
+        )
+        self.__maybe_error_on_response(resp)
+        return resp.json()["id"]
+
+    def create_json_display(
+        self,
+        payload: Union[Dict[str, Any], List[Any], int, str, float, bool, None],
+    ) -> str:
+        """Creates a json display.
+
+        Args:
+            payload: Payload to display
+
+        Returns:
+            The Airplane display's id.
+
+        Raises:
+            HTTPError: If the display could not be created.
+        """
+        resp = requests.post(
+            f"{self._api_host}/v0/displays/create",
+            json={"display": {"value": payload, "kind": "json"}},
+            headers=self._headers,
+        )
+        self.__maybe_error_on_response(resp)
+        return resp.json()["id"]
+
+    def create_table_display(
+        self,
+        columns: Optional[List[Dict[str, Optional[str]]]],
+        rows: List[Dict[str, Any]],
+    ) -> str:
+        """Creates a table display.
+
+        Args:
+            columns: Table columns containing keys slug and name
+            rows: Table rows containing a map from column name to value.
+
+        Returns:
+            The Airplane display's id.
+
+        Raises:
+            HTTPError: If the display could not be created.
+        """
+        resp = requests.post(
+            f"{self._api_host}/v0/displays/create",
+            json={"display": {"columns": columns, "rows": rows, "kind": "table"}},
+            headers=self._headers,
+        )
+        self.__maybe_error_on_response(resp)
+        return resp.json()["id"]
 
     @classmethod
     def __maybe_error_on_response(cls, resp: Response) -> None:
