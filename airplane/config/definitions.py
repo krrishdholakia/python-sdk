@@ -1,7 +1,8 @@
 import dataclasses
 import datetime
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from collections import Counter
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import inflection
 import typing_extensions
@@ -12,11 +13,11 @@ from airplane.config.types import (
     SQL,
     ConfigVar,
     DefaultParamTypes,
+    EnvVar,
     File,
     FuncT,
     LabeledOption,
     LongText,
-    OptionsT,
     ParamConfig,
     ParamType,
     Resource,
@@ -25,6 +26,7 @@ from airplane.config.types import (
 )
 from airplane.exceptions import (
     InvalidAnnotationException,
+    InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
 
@@ -36,9 +38,9 @@ class ParamDef:
     # ParamDefs have a subset of types that are built in and serializable.
     ParamDefTypes = Union[str, int, float]
     ParamDefOptions = Union[
-        OptionsT[str],
-        OptionsT[int],
-        OptionsT[float],
+        List[LabeledOption[str]],
+        List[LabeledOption[int]],
+        List[LabeledOption[float]],
     ]
 
     # Represents the original function's argument name.
@@ -55,6 +57,7 @@ class ParamDef:
 
     DATE_FORMAT = "%Y-%m-%d"
     DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+    DATETIME_MILLISECONDS_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     @staticmethod
     def to_def_param(
@@ -66,7 +69,7 @@ class ParamDef:
         if isinstance(val, datetime.date):
             return val.strftime(ParamDef.DATE_FORMAT)
         if isinstance(val, ConfigVar):
-            return val.value
+            return val.name
         return val
 
 
@@ -87,6 +90,7 @@ class TaskDef:
     resources: Optional[List[Resource]]
     schedules: Optional[List[Schedule]]
     parameters: Optional[List[ParamDef]]
+    env_vars: Optional[List[EnvVar]]
 
     def run(self, params: Dict[str, Any]) -> Any:
         """Execute task function from param dictionary"""
@@ -102,7 +106,10 @@ class TaskDef:
                 ).date()
             elif param.type == "datetime":
                 func_args[param.arg_name] = datetime.datetime.strptime(
-                    params[param.slug], ParamDef.DATETIME_FORMAT
+                    params[param.slug],
+                    ParamDef.DATETIME_MILLISECONDS_FORMAT
+                    if "." in params[param.slug]
+                    else ParamDef.DATETIME_FORMAT,
                 )
             elif param.type == "upload":
                 func_args[param.arg_name] = File(
@@ -133,6 +140,7 @@ class TaskDef:
         constraints: Optional[Dict[str, str]],
         resources: Optional[List[Resource]],
         schedules: Optional[List[Schedule]],
+        env_vars: Optional[List[EnvVar]],
     ) -> "TaskDef":
         """Construct a task definition from a function."""
         task_description = description
@@ -169,25 +177,27 @@ class TaskDef:
                 default = ParamDef.to_def_param(param.default)
                 if isinstance(default, File):
                     raise UnsupportedDefaultTypeException(
-                        "File defaults are not currently supported with inline code configuration"
+                        "File defaults are not currently supported with inline code configuration."
                     )
 
             options: Optional[ParamDef.ParamDefOptions]
             if param_config.options is None:
                 options = None
             else:
-                options = cast(
-                    ParamDef.ParamDefOptions,
-                    [
-                        LabeledOption(
-                            label=o.label,
-                            value=ParamDef.to_def_param(o.value),
+                options = []  # type: ignore
+                for option in param_config.options:
+                    if isinstance(option, LabeledOption):
+                        labeled_option = LabeledOption(
+                            label=option.label,
+                            value=ParamDef.to_def_param(option.value),
                         )
-                        if isinstance(o, LabeledOption)
-                        else ParamDef.to_def_param(o)
-                        for o in param_config.options
-                    ],
-                )
+                    else:
+                        value = ParamDef.to_def_param(option)
+                        labeled_option = LabeledOption(
+                            label=str(value),
+                            value=value,
+                        )
+                    options.append(labeled_option)  # type: ignore
 
             default_slug = make_slug(param.name)
             parameters.append(
@@ -206,6 +216,26 @@ class TaskDef:
                 )
             )
 
+        def _check_duplicates(counter: Counter, duplicate_type: str) -> None:
+            duplicates = [slug for slug, count in counter.items() if count > 1]
+            if duplicates:
+                raise InvalidTaskConfigurationException(
+                    f"Function {func.__name__} has duplicate {duplicate_type} {duplicates}"
+                )
+
+        _check_duplicates(Counter([p.slug for p in parameters]), "parameter slugs")
+        _check_duplicates(Counter([s.slug for s in schedules or []]), "schedule slugs")
+        _check_duplicates(Counter([e.name for e in env_vars or []]), "env var names")
+
+        # Convert schedule param values to the correct default types
+        for schedule in schedules or []:
+            if schedule.param_values is not None:
+                for param_name, param_value in schedule.param_values.items():
+                    if param_value is not None:
+                        schedule.param_values[param_name] = ParamDef.to_def_param(
+                            param_value
+                        )
+
         # pylint: disable=protected-access
         default_slug = make_slug(func.__name__)
         return cls(
@@ -221,6 +251,7 @@ class TaskDef:
             schedules=schedules,
             resources=resources,
             parameters=parameters,
+            env_vars=env_vars,
             entrypoint_func=func.__name__,
         )
 

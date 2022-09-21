@@ -39,7 +39,7 @@ class RunTerminationException(Exception):
 
 @dataclass
 class InvalidAnnotationException(Exception):
-    """Exception that indicates an invalid annotation was provided in task definition"""
+    """Exception that indicates an invalid annotation was provided in task definition."""
 
     func_name: str
     param_name: str
@@ -58,4 +58,8 @@ class InvalidAnnotationException(Exception):
 
 
 class UnsupportedDefaultTypeException(Exception):
-    """Exception that indicates a default value isn't supported for a given type"""
+    """Exception that indicates a default value isn't supported for a given type."""
+
+
+class InvalidTaskConfigurationException(Exception):
+    """Exception that indicates an inline task configuration is invalid."""

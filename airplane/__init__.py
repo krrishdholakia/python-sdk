@@ -8,7 +8,9 @@ from airplane.config.config import task, workflow
 from airplane.config.types import (
     SQL,
     ConfigVar,
+    EnvVar,
     File,
+    LabeledOption,
     LongText,
     ParamConfig,
     Resource,

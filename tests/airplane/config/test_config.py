@@ -1,5 +1,6 @@
 import datetime
 import os
+from distutils.command.config import config
 from typing import Any, Dict, Optional, Union
 from unittest import mock
 
@@ -11,6 +12,7 @@ from airplane.config.definitions import ParamDef, TaskDef, make_slug
 from airplane.config.types import (
     SQL,
     ConfigVar,
+    EnvVar,
     File,
     LabeledOption,
     LongText,
@@ -20,6 +22,7 @@ from airplane.config.types import (
 )
 from airplane.exceptions import (
     InvalidAnnotationException,
+    InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
 
@@ -57,6 +60,7 @@ def test_definition_with_defaults() -> None:
             )
         ],
         entrypoint_func="my_task",
+        env_vars=None,
     )
 
     @workflow()
@@ -88,6 +92,7 @@ def test_definition_with_defaults() -> None:
                 regex=None,
             )
         ],
+        env_vars=None,
         entrypoint_func="MyWorkflow",
     )
 
@@ -186,6 +191,7 @@ def test_decorator_with_parameters() -> None:
         resources=resources,
         parameters=[],
         entrypoint_func="my_task",
+        env_vars=None,
     )
     # Description provided in decorator takes precednce
     @task(
@@ -273,7 +279,11 @@ def test_param_configs() -> None:
                 description="annotated description",
                 default=None,
                 required=True,
-                options=[1, 2, 3],
+                options=[
+                    LabeledOption(label="1", value=1),
+                    LabeledOption(label="2", value=2),
+                    LabeledOption(label="3", value=3),
+                ],
                 regex=None,
             ),
             ParamDef(
@@ -321,6 +331,7 @@ def test_param_configs() -> None:
                 regex=None,
             ),
         ],
+        env_vars=None,
         entrypoint_func="my_task",
     )
 
@@ -398,14 +409,31 @@ def test_str_param() -> None:
             description=None,
             default="foo",
             required=False,
-            options=["foo", "bar"],
+            options=[
+                LabeledOption(label="foo", value="foo"),
+                LabeledOption(label="bar", value="bar"),
+            ],
             regex=None,
         ),
     ]
 
 
 def test_date_param() -> None:
-    @task()
+    @task(
+        schedules=[
+            Schedule(
+                slug="slug",
+                cron="* * * * *",
+                param_values={
+                    "required": datetime.date(
+                        2019,
+                        1,
+                        1,
+                    )
+                },
+            )
+        ],
+    )
     def my_task(
         required: datetime.date,
         optional: Optional[datetime.date] = datetime.date(2019, 8, 5),
@@ -432,6 +460,15 @@ def test_date_param() -> None:
             default_labeled,
         )
 
+    assert my_task.__airplane.schedules == [  # type: ignore
+        Schedule(
+            slug="slug",
+            cron="* * * * *",
+            name=None,
+            description=None,
+            param_values={"required": "2019-01-01"},
+        )
+    ]
     assert my_task.__airplane.parameters == [  # type: ignore
         ParamDef(
             slug="required",
@@ -463,7 +500,10 @@ def test_date_param() -> None:
             description=None,
             default="2019-08-05",
             required=False,
-            options=["2019-08-05", "2019-08-06"],
+            options=[
+                LabeledOption(label="2019-08-05", value="2019-08-05"),
+                LabeledOption(label="2019-08-06", value="2019-08-06"),
+            ],
             regex=None,
         ),
         ParamDef(
@@ -542,7 +582,14 @@ def test_datetime_param() -> None:
             description=None,
             default="2019-08-05T00:00:00Z",
             required=False,
-            options=["2019-08-05T00:00:00Z", "2019-08-06T00:00:00Z"],
+            options=[
+                LabeledOption(
+                    label="2019-08-05T00:00:00Z", value="2019-08-05T00:00:00Z"
+                ),
+                LabeledOption(
+                    label="2019-08-06T00:00:00Z", value="2019-08-06T00:00:00Z"
+                ),
+            ],
             regex=None,
         ),
         ParamDef(
@@ -615,7 +662,7 @@ def test_configvar_param() -> None:
             name="Optional",
             type="configvar",
             description=None,
-            default="bar",
+            default="foo",
             required=False,
             options=None,
             regex=None,
@@ -626,9 +673,12 @@ def test_configvar_param() -> None:
             name="Default",
             type="configvar",
             description=None,
-            default="bar",
+            default="foo",
             required=False,
-            options=["bar", "ban"],
+            options=[
+                LabeledOption(label="foo", value="foo"),
+                LabeledOption(label="baz", value="baz"),
+            ],
             regex=None,
         ),
         ParamDef(
@@ -637,11 +687,11 @@ def test_configvar_param() -> None:
             name="Default labeled",
             type="configvar",
             description=None,
-            default="bar",
+            default="foo",
             required=False,
             options=[
-                LabeledOption(label="foo", value="bar"),
-                LabeledOption(label="bar", value="ban"),
+                LabeledOption(label="foo", value="foo"),
+                LabeledOption(label="bar", value="baz"),
             ],
             regex=None,
         ),
@@ -682,6 +732,53 @@ def test_errors() -> None:
         @task()
         def unsupported_default(param: File = File("foo", "bar")):  # type: ignore
             del param
+
+    with pytest.raises(
+        InvalidTaskConfigurationException, match=r"Environment variable name*"
+    ):
+        EnvVar(name="foo=bar")
+
+    with pytest.raises(InvalidTaskConfigurationException, match=r"Exactly one of*"):
+        EnvVar(name="foo", config_var_name="foo", value="foo")
+
+    with pytest.raises(InvalidTaskConfigurationException, match=r"Exactly one of*"):
+        EnvVar(name="foo")
+
+    with pytest.raises(
+        InvalidTaskConfigurationException, match=r"has duplicate parameter slugs*"
+    ):
+
+        @task()
+        def duplicate_param_slugs(
+            param: str, param2: Annotated[str, ParamConfig(slug="param")]
+        ) -> None:
+            del param, param2
+
+    with pytest.raises(
+        InvalidTaskConfigurationException, match=r"has duplicate schedule slugs*"
+    ):
+
+        @task(
+            schedules=[
+                Schedule(slug="foo", cron="* * * * *"),
+                Schedule(slug="foo", cron="* * * * *"),
+            ]
+        )
+        def duplicate_schedule_slugs() -> None:
+            pass
+
+    with pytest.raises(
+        InvalidTaskConfigurationException, match=r"has duplicate env var names*"
+    ):
+
+        @task(
+            env_vars=[
+                EnvVar(name="foo", value="bar"),
+                EnvVar(name="foo", value="baz"),
+            ]
+        )
+        def duplicate_env_var_names() -> None:
+            pass
 
 
 def test_run() -> None:
