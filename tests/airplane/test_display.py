@@ -115,7 +115,7 @@ def test_table(mocked_post: mock.MagicMock) -> None:
         headers={
             "X-Airplane-Token": "foo_token",
             "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": "0.3.10",
+            "X-Airplane-Client-Version": __version__,
             "X-Airplane-Env-ID": "foo_env",
         },
     )
