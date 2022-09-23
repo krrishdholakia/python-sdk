@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "airplanesdk"
-version = "0.3.11"
+version = "0.3.12"
 description = "A Python SDK for writing Airplane tasks"
 authors = ["Airplane <support@airplane.dev>"]
 license = "MIT"
@@ -16,7 +16,7 @@ python = "^3.7.0"
 requests = "^2.25.1"
 backoff = "^1.10.0"
 deprecation = "^2.1.0"
-temporalio = "^0.1a2"
+temporalio = "0.1a2"
 docstring-parser = "^0.14.1"
 inflection = "^0.5.1"
 python-slugify = "^6.1.2"
