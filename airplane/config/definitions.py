@@ -96,10 +96,12 @@ class TaskDef:
         """Execute task function from param dictionary"""
         func_args: Dict[str, Any] = {}
         for param in self.parameters or []:
-            if not param.required and param.slug not in params:
-                if param.default is None:
-                    # Fill in None values for optional parameters that aren't provided
+            # If the user didn't provide a value for the parameter slug
+            if param.slug not in params:
+                # Fill in None values for optional parameters that aren't provided
+                if not param.required:
                     func_args[param.arg_name] = None
+                # Otherwise, we fall back to the function default arguments.
             elif param.type == "date":
                 func_args[param.arg_name] = datetime.datetime.strptime(
                     params[param.slug], ParamDef.DATE_FORMAT
@@ -209,7 +211,7 @@ class TaskDef:
                     type=_to_airplane_type(func.__name__, param.name, resolved_type),
                     description=param_config.description
                     or param_descriptions.get(param.name),
-                    required=not is_optional and default is None,
+                    required=not is_optional,
                     default=default,
                     options=options,
                     regex=param_config.regex,

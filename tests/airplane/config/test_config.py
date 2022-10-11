@@ -316,7 +316,7 @@ def test_param_configs() -> None:
                 type="integer",
                 description=None,
                 default=1,
-                required=False,
+                required=True,
                 options=None,
                 regex=None,
             ),
@@ -327,7 +327,7 @@ def test_param_configs() -> None:
                 type="integer",
                 description=None,
                 default=1,
-                required=False,
+                required=True,
                 options=[LabeledOption("label", 1), LabeledOption("label2", 2)],
                 regex=None,
             ),
@@ -409,7 +409,7 @@ def test_str_param() -> None:
             type="shorttext",
             description=None,
             default="foo",
-            required=False,
+            required=True,
             options=[
                 LabeledOption(label="foo", value="foo"),
                 LabeledOption(label="bar", value="bar"),
@@ -500,7 +500,7 @@ def test_date_param() -> None:
             type="date",
             description=None,
             default="2019-08-05",
-            required=False,
+            required=True,
             options=[
                 LabeledOption(label="2019-08-05", value="2019-08-05"),
                 LabeledOption(label="2019-08-06", value="2019-08-06"),
@@ -514,7 +514,7 @@ def test_date_param() -> None:
             type="date",
             description=None,
             default="2019-08-05",
-            required=False,
+            required=True,
             options=[
                 LabeledOption(label="foo", value="2019-08-05"),
                 LabeledOption(label="bar", value="2019-08-06"),
@@ -582,7 +582,7 @@ def test_datetime_param() -> None:
             type="datetime",
             description=None,
             default="2019-08-05T00:00:00Z",
-            required=False,
+            required=True,
             options=[
                 LabeledOption(
                     label="2019-08-05T00:00:00Z", value="2019-08-05T00:00:00Z"
@@ -600,7 +600,7 @@ def test_datetime_param() -> None:
             type="datetime",
             description=None,
             default="2019-08-05T00:00:00Z",
-            required=False,
+            required=True,
             options=[
                 LabeledOption(label="foo", value="2019-08-05T00:00:00Z"),
                 LabeledOption(label="bar", value="2019-08-06T00:00:00Z"),
@@ -675,7 +675,7 @@ def test_configvar_param() -> None:
             type="configvar",
             description=None,
             default="foo",
-            required=False,
+            required=True,
             options=[
                 LabeledOption(label="foo", value="foo"),
                 LabeledOption(label="baz", value="baz"),
@@ -689,7 +689,7 @@ def test_configvar_param() -> None:
             type="configvar",
             description=None,
             default="foo",
-            required=False,
+            required=True,
             options=[
                 LabeledOption(label="foo", value="foo"),
                 LabeledOption(label="bar", value="baz"),
