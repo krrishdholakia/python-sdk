@@ -8,6 +8,7 @@ import pytest
 from typing_extensions import Annotated
 
 from airplane._version import __version__
+from airplane.api.entities import Run, RunStatus
 from airplane.config.config import task, workflow
 from airplane.config.definitions import ParamDef, TaskDef, make_slug
 from airplane.config.types import (
@@ -130,7 +131,13 @@ def test_call(mocked_post: mock.MagicMock, mocked_get: mock.MagicMock) -> None:
         },
     )
     resp = my_task("foo", param_other="bar")
-    assert resp == "yay"
+    assert resp == Run(
+        id="run",
+        task_id=None,
+        param_values={"param_other": "bar", "param": "foo"},
+        status=RunStatus.SUCCEEDED,
+        output="yay",
+    )
     mocked_post.assert_called_with(
         "https://api.airplane.dev/v0/tasks/execute",
         json={

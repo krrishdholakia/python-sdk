@@ -1,6 +1,7 @@
 import functools
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional
 
+from airplane.api.entities import Run
 from airplane.config.definitions import TaskDef
 from airplane.config.types import EnvVar, FuncT, Resource, Schedule
 from airplane.runtime import execute
@@ -17,7 +18,7 @@ def task(
     resources: Optional[List[Resource]] = None,
     schedules: Optional[List[Schedule]] = None,
     env_vars: Optional[List[EnvVar]] = None,
-) -> Callable[[FuncT], FuncT]:
+) -> Callable[[FuncT], Callable[..., Run]]:
     """Decorator used to define an Airplane task.
 
     This decorator inspects the decorated function to create an Airplane task. The task's parameters
@@ -85,7 +86,7 @@ def task(
             to configure constant values or reference config variables.
     """
 
-    def decorator(func: FuncT) -> FuncT:
+    def decorator(func: FuncT) -> Callable[..., Run]:
         """Assigns an __airplane attribute to a function to mark it as an Airplane object"""
 
         config = TaskDef.build(
@@ -104,13 +105,13 @@ def task(
         )
 
         @functools.wraps(func)
-        def wrapped(*args: Any, **kwargs: Any) -> Any:
+        def wrapped(*args: Any, **kwargs: Any) -> Run:
             kwargs.update(zip(func.__code__.co_varnames, args))
-            return execute(config.slug, kwargs).output
+            return execute(config.slug, kwargs)
 
         # pylint: disable=protected-access
         wrapped.__airplane = config  # type: ignore
-        return cast(FuncT, wrapped)
+        return wrapped
 
     return decorator
 
@@ -126,7 +127,7 @@ def workflow(
     resources: Optional[List[Resource]] = None,
     schedules: Optional[List[Schedule]] = None,
     env_vars: Optional[List[EnvVar]] = None,
-) -> Callable[[FuncT], FuncT]:
+) -> Callable[[FuncT], Callable[..., Run]]:
     """Decorator used to define an Airplane workflow.
 
     This decorator inspects the decorated function to create an Airplane workflow.
@@ -194,7 +195,7 @@ def workflow(
             to configure constant values or reference config variables.
     """
 
-    def decorator(func: FuncT) -> FuncT:
+    def decorator(func: FuncT) -> Callable[..., Run]:
         """Assigns an __airplane attribute to a function to mark it as an Airplane object"""
         # pylint: disable=protected-access
         config = TaskDef.build(
@@ -213,12 +214,12 @@ def workflow(
         )
 
         @functools.wraps(func)
-        def wrapped(*args: Any, **kwargs: Any) -> Any:
+        def wrapped(*args: Any, **kwargs: Any) -> Run:
             kwargs.update(zip(func.__code__.co_varnames, args))
-            return execute(config.slug, kwargs).output
+            return execute(config.slug, kwargs)
 
         # pylint: disable=protected-access
         wrapped.__airplane = config  # type: ignore
-        return cast(FuncT, wrapped)
+        return wrapped
 
     return decorator
