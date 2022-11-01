@@ -3,7 +3,7 @@
 from airplane._version import __version__
 from airplane.api.client import APIClient
 from airplane.api.entities import Run, RunStatus
-from airplane.builtins import email, mongodb, rest, slack, sql
+from airplane.builtins import email, graphql, mongodb, rest, slack, sql
 from airplane.config.config import task, workflow
 from airplane.config.types import (
     SQL,
