@@ -6,8 +6,7 @@ from airplane.runtime import Run, __execute_internal
 
 def request(
     graphql_resource: str,
-    query: str,
-    operation_name: str = "",
+    operation: str,
     variables: Optional[Dict[str, Any]] = None,
     headers: Optional[Dict[str, Any]] = None,
     url_params: Optional[Dict[str, Any]] = None,
@@ -16,9 +15,7 @@ def request(
 
     Args:
         graphql_resource: The alias of the GraphQL resource to use.
-        query: The set of GraphQL operations to use.
-        operation_name: The name of the operation to execute. Can be blank if `query` contains only
-            one operation.
+        operation: The GraphQL operation to execute.
         variables: Optional GraphQL variables to include in the request.
         headers: Optional headers to include in the request.
         url_params: Optional url params to include in the request.
@@ -34,8 +31,7 @@ def request(
     return __execute_internal(
         "airplane:graphql_request",
         {
-            "query": query,
-            "operationName": operation_name,
+            "query": operation,
             "variables": variables,
             "headers": headers,
             "urlParams": url_params,
