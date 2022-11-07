@@ -33,7 +33,7 @@ def request(
     return __execute_internal(
         "airplane:graphql_request",
         {
-            "query": operation,
+            "operation": operation,
             "variables": variables,
             "headers": headers,
             "urlParams": url_params,
