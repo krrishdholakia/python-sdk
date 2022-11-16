@@ -4,7 +4,6 @@ from typing import Any, Dict, Optional
 
 from airplane.api.entities import Run
 from airplane.runtime.standard import execute as standard_execute
-from airplane.runtime.workflow import execute as workflow_execute
 
 __AIRPLANE_RUNTIME_ENV_VAR = "AIRPLANE_RUNTIME"
 
@@ -13,7 +12,7 @@ class RuntimeKind(Enum):
     """Valid runtime kinds for Airplane runs."""
 
     DEV = "dev"
-    STANDARD = "standard"
+    STANDARD = ""
     WORKFLOW = "workflow"
 
 
@@ -30,6 +29,7 @@ def execute(slug: str, param_values: Optional[Dict[str, Any]] = None) -> Run:
     Raises:
         HTTPError: If the task cannot be executed properly.
         RunTerminationException: If the run fails or is cancelled.
+        NotImplementedError: For workflow runs.
     """
     return __execute_internal(slug, param_values)
 
@@ -44,6 +44,6 @@ def __execute_internal(
     )
 
     if runtime_kind == RuntimeKind.WORKFLOW.value:
-        return workflow_execute(slug, param_values, resources)
+        raise NotImplementedError("Workflow run not supported yet by python sdk")
 
     return standard_execute(slug, param_values, resources)

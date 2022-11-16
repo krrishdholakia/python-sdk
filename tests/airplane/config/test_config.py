@@ -1,6 +1,5 @@
 import datetime
 import os
-from distutils.command.config import config
 from typing import Any, Dict, Optional, Union
 from unittest import mock
 
@@ -9,7 +8,7 @@ from typing_extensions import Annotated
 
 from airplane._version import __version__
 from airplane.api.entities import Run, RunStatus
-from airplane.config.config import task, workflow
+from airplane.config.config import task
 from airplane.config.definitions import ParamDef, TaskDef, make_slug
 from airplane.config.types import (
     SQL,
@@ -63,39 +62,6 @@ def test_definition_with_defaults() -> None:
         ],
         entrypoint_func="my_task",
         env_vars=None,
-    )
-
-    @workflow()
-    def MyWorkflow(param: str) -> str:  # pylint: disable=invalid-name
-        return param
-
-    assert MyWorkflow.__airplane == TaskDef(  # type: ignore
-        func=MyWorkflow.__wrapped__,  # type: ignore
-        runtime="workflow",
-        slug="my_workflow",
-        name="My workflow",
-        description=None,
-        require_requests=False,
-        allow_self_approvals=False,
-        timeout=3600,
-        constraints=None,
-        schedules=None,
-        resources=None,
-        parameters=[
-            ParamDef(
-                arg_name="param",
-                slug="param",
-                name="Param",
-                type="shorttext",
-                description=None,
-                default=None,
-                required=True,
-                options=None,
-                regex=None,
-            )
-        ],
-        env_vars=None,
-        entrypoint_func="MyWorkflow",
     )
 
 
