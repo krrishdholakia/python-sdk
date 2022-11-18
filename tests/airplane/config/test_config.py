@@ -122,6 +122,81 @@ def test_call(mocked_post: mock.MagicMock, mocked_get: mock.MagicMock) -> None:
     assert my_task.__airplane.func("param", "other_param") == "param"  # type: ignore
 
 
+@mock.patch.dict(
+    os.environ,
+    {
+        "AIRPLANE_API_HOST": "https://api.airplane.dev",
+        "AIRPLANE_TOKEN": "foo_token",
+        "AIRPLANE_ENV_ID": "foo_env",
+    },
+)
+@mock.patch("requests.get")
+@mock.patch("requests.post")
+def test_call_with_serialization(
+    mocked_post: mock.MagicMock, mocked_get: mock.MagicMock
+) -> None:
+    @task()
+    def my_task(
+        foo: datetime.date,
+        bar: datetime.datetime,
+        baz: ConfigVar,
+    ) -> datetime.date:
+        del bar, baz
+        return foo
+
+    mocked_post.return_value = mock.Mock(
+        status_code=200,
+        json=lambda: {
+            "runID": "run",
+        },
+    )
+    mocked_get.return_value = mock.Mock(
+        status_code=200,
+        json=lambda: {
+            "status": "Succeeded",
+            "id": "run",
+            "output": "yay",
+            "paramValues": {},
+        },
+    )
+    resp = my_task(
+        datetime.date(2019, 8, 5),
+        datetime.datetime(2019, 8, 5),
+        ConfigVar("foo", "bar"),
+    )
+    assert resp == Run(
+        id="run",
+        task_id=None,
+        param_values={},
+        status=RunStatus.SUCCEEDED,
+        output="yay",
+    )
+    mocked_post.assert_called_with(
+        "https://api.airplane.dev/v0/tasks/execute",
+        json={
+            "slug": "my_task",
+            "paramValues": {
+                "foo": "2019-08-05",
+                "bar": "2019-08-05T00:00:00Z",
+                "baz": "foo",
+            },
+            "resources": {},
+        },
+        headers={
+            "X-Airplane-Token": "foo_token",
+            "X-Airplane-Client-Kind": "sdk/python",
+            "X-Airplane-Client-Version": "0.3.13",
+            "X-Airplane-Env-ID": "foo_env",
+        },
+    )
+
+    assert my_task.__airplane.func(  # type: ignore
+        datetime.date(2019, 8, 5),
+        datetime.datetime(2019, 8, 5),
+        ConfigVar("foo", "bar"),
+    ) == datetime.date(2019, 8, 5)
+
+
 def test_decorator_with_parameters() -> None:
     schedules = [
         Schedule(

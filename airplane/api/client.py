@@ -8,6 +8,8 @@ from requests import Response
 from requests.models import HTTPError
 
 from airplane._version import __version__
+from airplane.config.definitions import ParamDef
+from airplane.config.types import InputParamTypes
 from airplane.exceptions import InvalidEnvironmentException
 
 
@@ -72,7 +74,7 @@ class APIClient:
     def execute_task(
         self,
         slug: str,
-        param_values: Optional[Dict[str, Any]] = None,
+        param_values: Optional[Dict[str, InputParamTypes]] = None,
         resources: Optional[Dict[str, str]] = None,
     ) -> str:
         """Executes an Airplane task with parameters and resources from a task slug.
@@ -88,11 +90,14 @@ class APIClient:
         Raises:
             HTTPError: If the run cannot be executed.
         """
+        serialized_params = {}
+        for key, val in (param_values or {}).items():
+            serialized_params[key] = ParamDef.serialize_param(val)
         resp = requests.post(
             f"{self._api_host}/v0/tasks/execute",
             json={
                 "slug": slug,
-                "paramValues": param_values or {},
+                "paramValues": serialized_params,
                 "resources": resources or {},
             },
             headers=self._headers,

@@ -100,7 +100,7 @@ class Resource:
     alias: Optional[str] = None
 
 
-DefaultParamTypes = Union[
+InputParamTypes = Union[
     str,
     LongText,
     SQL,
@@ -116,7 +116,7 @@ DefaultParamTypes = Union[
 ]
 DefaultParamT = TypeVar(
     "DefaultParamT",
-    bound=DefaultParamTypes,
+    bound=InputParamTypes,
 )
 
 
@@ -165,7 +165,7 @@ class Schedule:
     cron: str
     name: Optional[str] = None
     description: Optional[str] = None
-    param_values: Optional[Dict[str, Optional[DefaultParamTypes]]] = None
+    param_values: Optional[Dict[str, Optional[InputParamTypes]]] = None
 
 
 @dataclasses.dataclass

@@ -7,12 +7,13 @@ import requests
 from airplane._version import __version__
 from airplane.api.client import api_client_from_env
 from airplane.api.entities import Run, RunStatus
+from airplane.config.types import InputParamTypes
 from airplane.exceptions import RunPendingException, RunTerminationException
 
 
 def execute(
     slug: str,
-    param_values: Optional[Dict[str, Any]] = None,
+    param_values: Optional[Dict[str, InputParamTypes]] = None,
     resources: Optional[Dict[str, Any]] = None,
 ) -> Run:
     """Standard executes an Airplane task, waits for execution, and returns run metadata.

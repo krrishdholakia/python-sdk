@@ -12,10 +12,10 @@ from slugify import slugify  # type: ignore
 from airplane.config.types import (
     SQL,
     ConfigVar,
-    DefaultParamTypes,
     EnvVar,
     File,
     FuncT,
+    InputParamTypes,
     LabeledOption,
     LongText,
     ParamConfig,
@@ -60,8 +60,8 @@ class ParamDef:
     DATETIME_MILLISECONDS_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     @staticmethod
-    def to_def_param(
-        val: DefaultParamTypes,
+    def serialize_param(
+        val: InputParamTypes,
     ) -> ParamDefTypes:
         """Transforms a general parameter into a format supported by parameter definition"""
         if isinstance(val, datetime.datetime):
@@ -176,7 +176,7 @@ class TaskDef:
             if param.default is inspect.Signature.empty:
                 default = None
             else:
-                default = ParamDef.to_def_param(param.default)
+                default = ParamDef.serialize_param(param.default)
                 if isinstance(default, File):
                     raise UnsupportedDefaultTypeException(
                         "File defaults are not currently supported with inline code configuration."
@@ -191,10 +191,10 @@ class TaskDef:
                     if isinstance(option, LabeledOption):
                         labeled_option = LabeledOption(
                             label=option.label,
-                            value=ParamDef.to_def_param(option.value),
+                            value=ParamDef.serialize_param(option.value),
                         )
                     else:
-                        value = ParamDef.to_def_param(option)
+                        value = ParamDef.serialize_param(option)
                         labeled_option = LabeledOption(
                             label=str(value),
                             value=value,
@@ -234,7 +234,7 @@ class TaskDef:
             if schedule.param_values is not None:
                 for param_name, param_value in schedule.param_values.items():
                     if param_value is not None:
-                        schedule.param_values[param_name] = ParamDef.to_def_param(
+                        schedule.param_values[param_name] = ParamDef.serialize_param(
                             param_value
                         )
 
