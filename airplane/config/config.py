@@ -12,7 +12,7 @@ def task(
     name: Optional[str] = None,
     description: Optional[str] = None,
     require_requests: bool = False,
-    allow_self_approvals: bool = False,
+    allow_self_approvals: bool = True,
     timeout: int = 3600,
     constraints: Optional[Dict[str, str]] = None,
     resources: Optional[List[Resource]] = None,
