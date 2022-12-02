@@ -31,9 +31,9 @@ $ pre-commit install
 
 ## Deployment
 
-To deploy a new version of this SDK, first open a PR with your chages, then:
+To deploy a new version of this SDK, first open a PR with your changes, then:
 
-1. Bump the version number in `pyproject.toml` and `airplane/__init__.py`
+1. Bump the version number in `pyproject.toml` and `airplane/_version.py`
 2. Merge your changes to `main`
 3. Run the following off of `main` to build and publish to PyPI using your PyPI account (if necessary, request for access to the airplanesdk PyPI project first from an existing owner):
 

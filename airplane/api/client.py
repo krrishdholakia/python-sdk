@@ -145,8 +145,8 @@ class APIClient:
         self.__maybe_error_on_response(resp)
         return resp.json()["output"]
 
-    def create_markdown_display(self, content: str) -> str:
-        """Creates a markdown display.
+    def create_text_display(self, content: str) -> str:
+        """Creates a text display.
 
         Args:
             content: Content to display

@@ -2,10 +2,13 @@ import textwrap
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, Union
 
+import deprecation
+
+from airplane._version import __version__
 from airplane.api.client import api_client_from_env
 
 
-def markdown(content: str, dedent: bool = True) -> None:
+def text(content: str, dedent: bool = True) -> None:
     """Appends a display to the run that renders the provided markdown text.
 
     See the [CommonMark docs](https://commonmark.org/help/) for an introduction
@@ -20,7 +23,28 @@ def markdown(content: str, dedent: bool = True) -> None:
     """
     if dedent:
         content = textwrap.dedent(content)
-    api_client_from_env().create_markdown_display(content)
+    api_client_from_env().create_text_display(content)
+
+
+@deprecation.deprecated(
+    deprecated_in="0.3.14",
+    current_version=__version__,
+    details="Use text(content, dedent) instead.",
+)
+def markdown(content: str, dedent: bool = True) -> None:
+    """Appends a display to the run that renders the provided markdown text.
+
+    See the [CommonMark docs](https://commonmark.org/help/) for an introduction
+    to markdown formatting.
+
+    Args:
+        content: Text to render as markdown
+        dedent: Whether or not to omit leading whitespace from content.
+
+    Raises:
+        HTTPError: If the display could not be created.
+    """
+    text(content, dedent)
 
 
 def json(

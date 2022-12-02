@@ -185,7 +185,7 @@ def test_call_with_serialization(
         headers={
             "X-Airplane-Token": "foo_token",
             "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": "0.3.13",
+            "X-Airplane-Client-Version": __version__,
             "X-Airplane-Env-ID": "foo_env",
         },
     )

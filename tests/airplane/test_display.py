@@ -14,14 +14,14 @@ from airplane._version import __version__
     },
 )
 @mock.patch("requests.post")
-def test_markdown(mocked_post: mock.MagicMock) -> None:
+def test_text(mocked_post: mock.MagicMock) -> None:
     mocked_post.return_value = mock.Mock(
         status_code=200,
         json=lambda: {
             "id": "output_id",
         },
     )
-    display.markdown(
+    display.text(
         """
         hello world
         """
