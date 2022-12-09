@@ -31,7 +31,7 @@ from airplane.exceptions import (
 )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ParamDef:
     """Parameter definition"""
 
@@ -73,7 +73,7 @@ class ParamDef:
         return val
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class TaskDef:
     """Task definition"""
 
@@ -272,7 +272,8 @@ def _resolve_type(
                 func_name=func_name,
                 param_name=param_name,
             )
-        return type_args[0], True, None
+        underlying_type, _, _ = _resolve_type(func_name, param_name, type_args[0])
+        return underlying_type, True, None
     if origin_type == typing_extensions.Annotated:
         type_args = typing_extensions.get_args(type_hint)
         param_configs = [t for t in type_args if isinstance(t, ParamConfig)]

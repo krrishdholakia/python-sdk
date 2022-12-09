@@ -47,7 +47,7 @@ else:
     SQL = NewType("SQL", str)
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class File:
     """Airplane file parameter.
 
@@ -69,7 +69,7 @@ class File:
     url: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ConfigVar:
     """Airplane config variable parameter.
 
@@ -81,7 +81,7 @@ class ConfigVar:
     value: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Resource:
     """Airplane resource attachment.
 
@@ -120,7 +120,7 @@ DefaultParamT = TypeVar(
 )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class LabeledOption(Generic[DefaultParamT]):
     """Parmeter select option with a label."""
 
@@ -139,7 +139,7 @@ AllOptions = Union[
 ]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Schedule:
     """Airplane schedule definition.
 
@@ -168,7 +168,7 @@ class Schedule:
     param_values: Optional[Dict[str, Optional[InputParamTypes]]] = None
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class EnvVar:
     """Airplane environment variable.
 
@@ -202,7 +202,7 @@ class EnvVar:
             )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ParamConfig:
     """Task parameter configuration.
 

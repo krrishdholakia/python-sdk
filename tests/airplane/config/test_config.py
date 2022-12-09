@@ -926,3 +926,65 @@ def test_run() -> None:
 )
 def test_make_slug(string: str, expected: str) -> None:
     assert make_slug(string) == expected
+
+
+def test_definition_nested_types() -> None:
+    @task()
+    def my_task(
+        param_optional: Annotated[Optional[Optional[str]], ParamConfig()],
+        param_optional_nested: Optional[Union[Optional[str], None]],
+        param: Annotated[str, ParamConfig()] = None,
+    ) -> Optional[str]:
+        del param_optional, param_optional_nested
+        return param
+
+    assert my_task.__airplane == TaskDef(  # type: ignore
+        func=my_task.__wrapped__,  # type: ignore
+        runtime="",
+        slug="my_task",
+        name="My task",
+        description=None,
+        require_requests=False,
+        allow_self_approvals=True,
+        timeout=3600,
+        constraints=None,
+        schedules=None,
+        resources=None,
+        parameters=[
+            ParamDef(
+                arg_name="param_optional",
+                slug="param_optional",
+                name="Param optional",
+                type="shorttext",
+                description=None,
+                default=None,
+                required=False,
+                options=None,
+                regex=None,
+            ),
+            ParamDef(
+                arg_name="param_optional_nested",
+                slug="param_optional_nested",
+                name="Param optional nested",
+                type="shorttext",
+                description=None,
+                default=None,
+                required=False,
+                options=None,
+                regex=None,
+            ),
+            ParamDef(
+                arg_name="param",
+                slug="param",
+                name="Param",
+                type="shorttext",
+                description=None,
+                default=None,
+                required=False,
+                options=None,
+                regex=None,
+            ),
+        ],
+        entrypoint_func="my_task",
+        env_vars=None,
+    )
