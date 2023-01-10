@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Generic, Optional, TypeVar
+
+from airplane.types import JSONType
 
 
 class RunStatus(Enum):
@@ -23,6 +25,29 @@ class RunStatus(Enum):
         return self in [self.SUCCEEDED, self.FAILED, self.CANCELLED]
 
 
+JSONTypeT = TypeVar(
+    "JSONTypeT",
+    bound=JSONType,
+)
+
+
+@dataclass
+class BuiltInRun(Generic[JSONTypeT]):
+    """Representation of an Airplane built-in run.
+
+    Attributes:
+        id: The id of the run.
+        param_values: The param values the run was provided.
+        status: The current status of the run.
+        output: The outputs (if any) of the run.
+    """
+
+    id: str
+    param_values: Dict[str, Any]
+    status: RunStatus
+    output: JSONTypeT
+
+
 @dataclass
 class Run:
     """Representation of an Airplane run.
@@ -39,4 +64,4 @@ class Run:
     task_id: Optional[str]
     param_values: Dict[str, Any]
     status: RunStatus
-    output: Any
+    output: JSONType

@@ -1,8 +1,11 @@
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
+from typing_extensions import TypedDict
+
+from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import Run, __execute_internal
+from airplane.runtime import __execute_internal
 
 
 class Method(Enum):
@@ -25,6 +28,12 @@ class BodyType(Enum):
     FORM_URL_ENCODED = "x-www-form-urlencoded"
 
 
+class RequestOutput(TypedDict):
+    """The output of the rest.request builtin."""
+
+    response: Union[str, Dict[str, Any]]
+
+
 def request(
     rest_resource: str,
     method: Method,
@@ -35,7 +44,7 @@ def request(
     body: Optional[Union[Dict[str, Any], str]] = None,
     form_data: Optional[Dict[str, Any]] = None,
     retry_failures: bool = False,
-) -> Run:
+) -> BuiltInRun[RequestOutput]:
     """Runs the builtin request function against a REST Airplane resource.
 
     Args:
@@ -57,17 +66,20 @@ def request(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:rest_request",
-        {
-            "method": method.value,
-            "path": path,
-            "headers": headers,
-            "urlParams": url_params,
-            "bodyType": body_type.value,
-            "body": body,
-            "formData": form_data,
-            "retryFailures": retry_failures,
-        },
-        {"rest": __convert_resource_alias_to_id(rest_resource)},
+    return cast(
+        BuiltInRun[RequestOutput],
+        __execute_internal(
+            "airplane:rest_request",
+            {
+                "method": method.value,
+                "path": path,
+                "headers": headers,
+                "urlParams": url_params,
+                "bodyType": body_type.value,
+                "body": body,
+                "formData": form_data,
+                "retryFailures": retry_failures,
+            },
+            {"rest": __convert_resource_alias_to_id(rest_resource)},
+        ),
     )

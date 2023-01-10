@@ -1,9 +1,12 @@
 import textwrap
 from dataclasses import asdict, dataclass, is_dataclass
-from typing import List, Union
+from typing import List, Union, cast
 
+from typing_extensions import TypedDict
+
+from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import Run, __execute_internal
+from airplane.runtime import __execute_internal
 
 
 @dataclass
@@ -19,6 +22,12 @@ class Contact:
     name: str
 
 
+class MessageOutput(TypedDict):
+    """The output of the email.message builtin."""
+
+    number_of_recipients: int
+
+
 def message(
     email_resource: str,
     sender: Contact,
@@ -26,7 +35,7 @@ def message(
     subject: str = "",
     message: str = "",  # pylint: disable=redefined-outer-name
     dedent: bool = True,
-) -> Run:
+) -> BuiltInRun[MessageOutput]:
     """Runs the builtin message function against an email Airplane resource.
 
     Args:
@@ -46,16 +55,19 @@ def message(
     """
     if dedent:
         message = textwrap.dedent(message)
-    return __execute_internal(
-        "airplane:email_message",
-        {
-            "sender": asdict(sender),
-            "recipients": [
-                asdict(recipient) if is_dataclass(recipient) else recipient
-                for recipient in recipients
-            ],
-            "subject": subject,
-            "message": message,
-        },
-        {"email": __convert_resource_alias_to_id(email_resource)},
+    return cast(
+        BuiltInRun[MessageOutput],
+        __execute_internal(
+            "airplane:email_message",
+            {
+                "sender": asdict(sender),
+                "recipients": [
+                    asdict(recipient) if is_dataclass(recipient) else recipient
+                    for recipient in recipients
+                ],
+                "subject": subject,
+                "message": message,
+            },
+            {"email": __convert_resource_alias_to_id(email_resource)},
+        ),
     )

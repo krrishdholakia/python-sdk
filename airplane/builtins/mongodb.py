@@ -1,7 +1,10 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
+from typing_extensions import TypedDict
+
+from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import Run, __execute_internal
+from airplane.runtime import __execute_internal
 
 
 def find(
@@ -12,7 +15,7 @@ def find(
     sort: Optional[Dict[str, Any]] = None,
     skip: Optional[int] = None,
     limit: Optional[int] = None,
-) -> Run:
+) -> BuiltInRun[List[Dict[str, Any]]]:
     """Runs the find function against a MongoDB Airplane resource.
 
     Args:
@@ -32,17 +35,20 @@ def find(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_find",
-        {
-            "collection": collection,
-            "filter": filter,
-            "projection": projection,
-            "sort": sort,
-            "skip": skip,
-            "limit": limit,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[List[Dict[str, Any]]],
+        __execute_internal(
+            "airplane:mongodb_find",
+            {
+                "collection": collection,
+                "filter": filter,
+                "projection": projection,
+                "sort": sort,
+                "skip": skip,
+                "limit": limit,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -52,7 +58,7 @@ def find_one(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> Run:
+) -> BuiltInRun[Optional[Dict[str, Any]]]:
     """Runs the findOne function against a MongoDB Airplane resource.
 
     Args:
@@ -70,15 +76,18 @@ def find_one(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_findOne",
-        {
-            "collection": collection,
-            "filter": filter,
-            "projection": projection,
-            "sort": sort,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[Optional[Dict[str, Any]]],
+        __execute_internal(
+            "airplane:mongodb_findOne",
+            {
+                "collection": collection,
+                "filter": filter,
+                "projection": projection,
+                "sort": sort,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -88,7 +97,7 @@ def find_one_and_delete(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> Run:
+) -> BuiltInRun[Optional[Dict[str, Any]]]:
     """Runs the findOneAndDelete function against a MongoDB Airplane resource.
 
     Args:
@@ -106,15 +115,18 @@ def find_one_and_delete(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_findOneAndDelete",
-        {
-            "collection": collection,
-            "filter": filter,
-            "projection": projection,
-            "sort": sort,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[Optional[Dict[str, Any]]],
+        __execute_internal(
+            "airplane:mongodb_findOneAndDelete",
+            {
+                "collection": collection,
+                "filter": filter,
+                "projection": projection,
+                "sort": sort,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -125,7 +137,7 @@ def find_one_and_update(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> Run:
+) -> BuiltInRun[Optional[Dict[str, Any]]]:
     """Runs the findOneAndUpdate function against a MongoDB Airplane resource.
 
     Args:
@@ -144,16 +156,19 @@ def find_one_and_update(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_findOneAndUpdate",
-        {
-            "collection": collection,
-            "update": update,
-            "filter": filter,
-            "projection": projection,
-            "sort": sort,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[Optional[Dict[str, Any]]],
+        __execute_internal(
+            "airplane:mongodb_findOneAndUpdate",
+            {
+                "collection": collection,
+                "update": update,
+                "filter": filter,
+                "projection": projection,
+                "sort": sort,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -165,7 +180,7 @@ def find_one_and_replace(
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
     upsert: Optional[bool] = None,
-) -> Run:
+) -> BuiltInRun[Optional[Dict[str, Any]]]:
     """Runs the findOneAndReplace function against a MongoDB Airplane resource.
 
     Args:
@@ -185,25 +200,34 @@ def find_one_and_replace(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_findOneAndReplace",
-        {
-            "collection": collection,
-            "replacement": replacement,
-            "filter": filter,
-            "projection": projection,
-            "sort": sort,
-            "upsert": upsert,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[Optional[Dict[str, Any]]],
+        __execute_internal(
+            "airplane:mongodb_findOneAndReplace",
+            {
+                "collection": collection,
+                "replacement": replacement,
+                "filter": filter,
+                "projection": projection,
+                "sort": sort,
+                "upsert": upsert,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
+
+
+class InsertOneOutput(TypedDict):
+    """The output of the mongodb.insert_one builtin."""
+
+    InsertedID: str
 
 
 def insert_one(
     mongodb_resource: str,
     collection: str,
     document: Dict[str, Any],
-) -> Run:
+) -> BuiltInRun[InsertOneOutput]:
     """Runs the insertOne function against a MongoDB Airplane resource.
 
     Args:
@@ -219,21 +243,30 @@ def insert_one(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_insertOne",
-        {
-            "collection": collection,
-            "document": document,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[InsertOneOutput],
+        __execute_internal(
+            "airplane:mongodb_insertOne",
+            {
+                "collection": collection,
+                "document": document,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
+
+
+class InsertManyOutput(TypedDict):
+    """The output of the mongodb.insert_many builtin."""
+
+    InsertedIDs: List[str]
 
 
 def insert_many(
     mongodb_resource: str,
     collection: str,
     documents: List[Dict[str, Any]],
-) -> Run:
+) -> BuiltInRun[InsertManyOutput]:
     """Runs the insertMany function against a MongoDB Airplane resource.
 
     Args:
@@ -249,14 +282,26 @@ def insert_many(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_insertMany",
-        {
-            "collection": collection,
-            "documents": documents,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[InsertManyOutput],
+        __execute_internal(
+            "airplane:mongodb_insertMany",
+            {
+                "collection": collection,
+                "documents": documents,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
+
+
+class UpdateOutput(TypedDict):
+    """The output of the mongodb.update_one and mongodb.udpate_many builtins."""
+
+    MatchedCount: int
+    ModifiedCount: int
+    UpsertedCount: int
+    UpsertedID: Optional[str]
 
 
 def update_one(
@@ -265,7 +310,7 @@ def update_one(
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     upsert: Optional[bool] = None,
-) -> Run:
+) -> BuiltInRun[UpdateOutput]:
     """Runs the updateOne function against a MongoDB Airplane resource.
 
     Args:
@@ -283,15 +328,18 @@ def update_one(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_updateOne",
-        {
-            "collection": collection,
-            "update": update,
-            "filter": filter,
-            "upsert": upsert,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[UpdateOutput],
+        __execute_internal(
+            "airplane:mongodb_updateOne",
+            {
+                "collection": collection,
+                "update": update,
+                "filter": filter,
+                "upsert": upsert,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -301,7 +349,7 @@ def update_many(
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     upsert: Optional[bool] = None,
-) -> Run:
+) -> BuiltInRun[UpdateOutput]:
     """Runs the updateMany function against a MongoDB Airplane resource.
 
     Args:
@@ -319,23 +367,32 @@ def update_many(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_updateMany",
-        {
-            "collection": collection,
-            "update": update,
-            "filter": filter,
-            "upsert": upsert,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[UpdateOutput],
+        __execute_internal(
+            "airplane:mongodb_updateMany",
+            {
+                "collection": collection,
+                "update": update,
+                "filter": filter,
+                "upsert": upsert,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
+
+
+class DeleteOutput(TypedDict):
+    """The output of the mongodb.delete_one and mongodb.delete_many builtins."""
+
+    DeletedCount: int
 
 
 def delete_one(
     mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Run:
+) -> BuiltInRun[DeleteOutput]:
     """Runs the deleteOne function against a MongoDB Airplane resource.
 
     Args:
@@ -351,13 +408,16 @@ def delete_one(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_deleteOne",
-        {
-            "collection": collection,
-            "filter": filter,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[DeleteOutput],
+        __execute_internal(
+            "airplane:mongodb_deleteOne",
+            {
+                "collection": collection,
+                "filter": filter,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -365,7 +425,7 @@ def delete_many(
     mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Run:
+) -> BuiltInRun[DeleteOutput]:
     """Runs the deleteMany function against a MongoDB Airplane resource.
 
     Args:
@@ -381,13 +441,16 @@ def delete_many(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_deleteMany",
-        {
-            "collection": collection,
-            "filter": filter,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[DeleteOutput],
+        __execute_internal(
+            "airplane:mongodb_deleteMany",
+            {
+                "collection": collection,
+                "filter": filter,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -395,7 +458,7 @@ def aggregate(
     mongodb_resource: str,
     collection: str,
     pipeline: List[Dict[str, Any]],
-) -> Run:
+) -> BuiltInRun[List[Dict[str, Any]]]:
     """Runs the aggregate function against a MongoDB Airplane resource.
 
     Args:
@@ -411,13 +474,16 @@ def aggregate(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_aggregate",
-        {
-            "collection": collection,
-            "pipeline": pipeline,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[List[Dict[str, Any]]],
+        __execute_internal(
+            "airplane:mongodb_aggregate",
+            {
+                "collection": collection,
+                "pipeline": pipeline,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -425,7 +491,7 @@ def count_documents(
     mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Run:
+) -> BuiltInRun[float]:
     """Runs the countDocuments function against a MongoDB Airplane resource.
 
     Args:
@@ -441,13 +507,16 @@ def count_documents(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_countDocuments",
-        {
-            "collection": collection,
-            "filter": filter,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[float],
+        __execute_internal(
+            "airplane:mongodb_countDocuments",
+            {
+                "collection": collection,
+                "filter": filter,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )
 
 
@@ -456,7 +525,7 @@ def distinct(
     collection: str,
     field: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> Run:
+) -> BuiltInRun[List[Any]]:
     """Runs the distinct function against a MongoDB Airplane resource.
 
     Args:
@@ -473,12 +542,15 @@ def distinct(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:mongodb_distinct",
-        {
-            "collection": collection,
-            "field": field,
-            "filter": filter,
-        },
-        {"db": __convert_resource_alias_to_id(mongodb_resource)},
+    return cast(
+        BuiltInRun[List[Any]],
+        __execute_internal(
+            "airplane:mongodb_distinct",
+            {
+                "collection": collection,
+                "field": field,
+                "filter": filter,
+            },
+            {"db": __convert_resource_alias_to_id(mongodb_resource)},
+        ),
     )

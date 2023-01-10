@@ -1,7 +1,17 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, cast
 
+from typing_extensions import TypedDict
+
+from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import Run, __execute_internal
+from airplane.runtime import __execute_internal
+
+
+class RequestOutput(TypedDict):
+    """The output of the graphql.request builtin."""
+
+    data: Optional[Dict[str, Any]]
+    errors: Optional[List[Dict[str, Any]]]
 
 
 def request(
@@ -11,7 +21,7 @@ def request(
     headers: Optional[Dict[str, Any]] = None,
     url_params: Optional[Dict[str, Any]] = None,
     retry_failures: bool = False,
-) -> Run:
+) -> BuiltInRun[RequestOutput]:
     """Runs the builtin request function against a GraphQL Airplane resource.
 
     Args:
@@ -30,14 +40,17 @@ def request(
         RunTerminationException: If the run fails or is cancelled.
     """
 
-    return __execute_internal(
-        "airplane:graphql_request",
-        {
-            "operation": operation,
-            "variables": variables,
-            "headers": headers,
-            "urlParams": url_params,
-            "retryFailures": retry_failures,
-        },
-        {"api": __convert_resource_alias_to_id(graphql_resource)},
+    return cast(
+        BuiltInRun[RequestOutput],
+        __execute_internal(
+            "airplane:graphql_request",
+            {
+                "operation": operation,
+                "variables": variables,
+                "headers": headers,
+                "urlParams": url_params,
+                "retryFailures": retry_failures,
+            },
+            {"api": __convert_resource_alias_to_id(graphql_resource)},
+        ),
     )
