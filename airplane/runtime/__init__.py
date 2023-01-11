@@ -1,6 +1,6 @@
 import os
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Type
 
 from airplane.api.entities import Run
 from airplane.runtime.standard import execute as standard_execute

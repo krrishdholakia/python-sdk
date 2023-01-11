@@ -7,8 +7,8 @@ import requests
 from airplane._version import __version__
 from airplane.api.client import api_client_from_env
 from airplane.api.entities import Run, RunStatus
-from airplane.config.types import InputParamTypes
 from airplane.exceptions import RunPendingException, RunTerminationException
+from airplane.params import InputParamTypes
 
 
 def execute(

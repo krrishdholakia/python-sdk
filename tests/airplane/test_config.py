@@ -8,24 +8,23 @@ from typing_extensions import Annotated
 
 from airplane._version import __version__
 from airplane.api.entities import Run, RunStatus
-from airplane.config.config import task
-from airplane.config.definitions import ParamDef, TaskDef, make_slug
-from airplane.config.types import (
-    SQL,
-    ConfigVar,
+from airplane.config import (
     EnvVar,
-    File,
     LabeledOption,
-    LongText,
     ParamConfig,
+    ParamDef,
     Resource,
     Schedule,
+    TaskDef,
+    task,
 )
 from airplane.exceptions import (
     InvalidAnnotationException,
     InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
+from airplane.types import SQL, ConfigVar, File, LongText
+from airplane.utils import make_slug
 
 # pylint: disable=protected-access
 

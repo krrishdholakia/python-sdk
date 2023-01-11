@@ -8,9 +8,8 @@ from requests import Response
 from requests.models import HTTPError
 
 from airplane._version import __version__
-from airplane.config.definitions import ParamDef
-from airplane.config.types import InputParamTypes
 from airplane.exceptions import InvalidEnvironmentException
+from airplane.params import InputParamTypes, serialize_param
 
 
 @dataclass(frozen=True)
@@ -92,7 +91,7 @@ class APIClient:
         """
         serialized_params = {}
         for key, val in (param_values or {}).items():
-            serialized_params[key] = ParamDef.serialize_param(val)
+            serialized_params[key] = serialize_param(val)
         resp = requests.post(
             f"{self._api_host}/v0/tasks/execute",
             json={

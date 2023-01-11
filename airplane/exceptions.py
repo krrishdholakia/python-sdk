@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from textwrap import dedent
+from typing import Optional
 
 from airplane.api.entities import Run
 
@@ -41,14 +42,16 @@ class RunTerminationException(Exception):
 class InvalidAnnotationException(Exception):
     """Exception that indicates an invalid annotation was provided in task definition."""
 
-    func_name: str
     param_name: str
     prefix: str
+    func_name: Optional[str] = None
 
     def __str__(self) -> str:
+        source = (
+            f"function `{self.func_name}`" if self.func_name else "prompt definition"
+        )
         return dedent(
-            f"""{self.prefix} for parameter `{self.param_name}` of
-            function `{self.func_name}`.
+            f"""{self.prefix} for parameter `{self.param_name}` from {source}.
 
             Type must be one of (str, int, float, bool, datetime.date, datetime.datetime,
             airplane.LongText, airplane.File, airplane.ConfigVar, airplane.SQL,
