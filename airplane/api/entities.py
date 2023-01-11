@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import Any, Dict, Generic, List, Optional, TypeVar
 
 from airplane.types import JSONType
 
@@ -65,3 +65,21 @@ class Run:
     param_values: Dict[str, Any]
     status: RunStatus
     output: JSONType
+
+
+@dataclass
+class PromptReviewers:
+    """Reviewers that are allowed to approve the prompt.
+
+    Args:
+        groups: List of groups allowed to approve the prompt. Groups are
+            referenced via their slugs.
+        users: List of users allowed to approve the prompt. Users are
+            referenced via their emails.
+        allow_self_approvals: Whether or not the run creator is allowed to approve
+            their own prompt.
+    """
+
+    groups: Optional[List[str]] = None
+    users: Optional[List[str]] = None
+    allow_self_approvals: bool = True

@@ -25,7 +25,7 @@ ParamType = Literal[
     "configvar",
 ]
 
-InputParamTypes = Union[
+ParamTypes = Union[
     str,
     LongText,
     SQL,
@@ -85,7 +85,7 @@ class SerializedParam:
 
 DefaultParamT = TypeVar(
     "DefaultParamT",
-    bound=InputParamTypes,
+    bound=ParamTypes,
 )
 
 
@@ -131,7 +131,9 @@ class ParamConfig:
         regex:
             Regex contraint for the parameter, only valid for string arguments.
         default:
-            Default value for the parameter.
+            Default value for the parameter. This field should only be used for prompt
+            parameters, not task parameters. For task parameters, use the Python native
+            default function parameter syntax, .e.g. `def my_task(my_param: str = "default")`.
     """
 
     slug: Optional[str] = None
@@ -139,7 +141,7 @@ class ParamConfig:
     description: Optional[str] = None
     options: Optional[AllOptions] = None
     regex: Optional[str] = None
-    default: Optional[InputParamTypes] = None
+    default: Optional[ParamTypes] = None
 
 
 def to_airplane_type(func_name: str, param_name: str, type_hint: Any) -> ParamType:
@@ -252,7 +254,7 @@ ParamDefOptions = Union[
 
 
 def serialize_param(
-    val: InputParamTypes,
+    val: ParamTypes,
 ) -> ParamDefTypes:
     """Transforms a general parameter into a format supported by parameter definition"""
     if isinstance(val, datetime.datetime):

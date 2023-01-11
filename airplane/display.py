@@ -6,6 +6,7 @@ import deprecation
 
 from airplane._version import __version__
 from airplane.api.client import api_client_from_env
+from airplane.types import JSONType
 
 
 def text(content: str, dedent: bool = True) -> None:
@@ -48,7 +49,7 @@ def markdown(content: str, dedent: bool = True) -> None:
 
 
 def json(
-    payload: Union[Dict[str, Any], List[Any], int, str, float, bool, None],
+    payload: JSONType,
 ) -> None:
     """Appends a display to the run that renders a JSON payload.
 

@@ -987,3 +987,75 @@ def test_definition_nested_types() -> None:
         entrypoint_func="my_task",
         env_vars=None,
     )
+
+
+def test_param_config_default() -> None:
+    @task()
+    def my_task(
+        foo: str = "foo",
+        bar: Annotated[str, ParamConfig(default="bar")] = "bar",
+    ) -> str:
+        del foo, bar
+        return foo
+
+    assert my_task.__airplane == TaskDef(  # type: ignore
+        func=my_task.__wrapped__,  # type: ignore
+        runtime="",
+        slug="my_task",
+        name="My task",
+        description=None,
+        require_requests=False,
+        allow_self_approvals=True,
+        timeout=3600,
+        constraints=None,
+        schedules=None,
+        resources=None,
+        parameters=[
+            ParamDef(
+                arg_name="foo",
+                slug="foo",
+                name="Foo",
+                type="shorttext",
+                description=None,
+                default="foo",
+                required=True,
+                options=None,
+                regex=None,
+            ),
+            ParamDef(
+                arg_name="bar",
+                slug="bar",
+                name="Bar",
+                type="shorttext",
+                description=None,
+                default="bar",
+                required=True,
+                options=None,
+                regex=None,
+            ),
+        ],
+        entrypoint_func="my_task",
+        env_vars=None,
+    )
+
+    with pytest.raises(
+        InvalidTaskConfigurationException, match=r".*invalid default value.*"
+    ):
+
+        @task()
+        def invalid_task(
+            bar: Annotated[str, ParamConfig(default="bar")] = "baz",
+        ) -> str:
+            del bar
+            return bar
+
+    with pytest.raises(
+        InvalidTaskConfigurationException, match=r".*invalid default value.*"
+    ):
+
+        @task()
+        def invalid_task2(
+            bar: Annotated[str, ParamConfig(default="bar")],
+        ) -> str:
+            del bar
+            return bar

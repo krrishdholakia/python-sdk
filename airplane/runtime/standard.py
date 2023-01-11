@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import backoff
 import deprecation
@@ -6,14 +6,18 @@ import requests
 
 from airplane._version import __version__
 from airplane.api.client import api_client_from_env
-from airplane.api.entities import Run, RunStatus
-from airplane.exceptions import RunPendingException, RunTerminationException
-from airplane.params import InputParamTypes
+from airplane.api.entities import PromptReviewers, Run, RunStatus
+from airplane.exceptions import (
+    PromptPendingException,
+    RunPendingException,
+    RunTerminationException,
+)
+from airplane.params import ParamTypes, SerializedParam
 
 
 def execute(
     slug: str,
-    param_values: Optional[Dict[str, InputParamTypes]] = None,
+    param_values: Optional[Dict[str, ParamTypes]] = None,
     resources: Optional[Dict[str, Any]] = None,
 ) -> Run:
     """Standard executes an Airplane task, waits for execution, and returns run metadata.
@@ -45,7 +49,7 @@ def execute(
     )
 
     if run.status in (RunStatus.FAILED, RunStatus.CANCELLED):
-        raise RunTerminationException(run)
+        raise RunTerminationException(run.status.value)
 
     return run
 
@@ -96,3 +100,40 @@ def __wait_for_run_completion(run_id: str) -> Dict[str, Any]:
     if run_info["status"] in ("NotStarted", "Queued", "Active"):
         raise RunPendingException()
     return run_info
+
+
+def prompt_background(
+    serialized_params: List[SerializedParam],
+    *,
+    reviewers: Optional[PromptReviewers] = None,
+    confirm_text: Optional[str] = None,
+    cancel_text: Optional[str] = None,
+    description: Optional[str] = None,
+) -> str:
+    """Creates a prompt in the background, returning the prompt ID."""
+
+    client = api_client_from_env()
+    return client.create_prompt(
+        parameters=serialized_params,
+        reviewers=reviewers,
+        confirm_text=confirm_text,
+        cancel_text=cancel_text,
+        description=description,
+    )
+
+
+@backoff.on_exception(
+    lambda: backoff.expo(factor=0.1, max_value=5),
+    (
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+        PromptPendingException,
+    ),
+)
+def wait_for_prompt(prompt_id: str) -> Dict[str, Any]:
+    """Waits until a prompt is submitted and returns the prompt values."""
+    client = api_client_from_env()
+    prompt_info = client.get_prompt(prompt_id)
+    if not prompt_info["submittedAt"]:
+        raise PromptPendingException()
+    return prompt_info

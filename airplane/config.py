@@ -19,11 +19,11 @@ from airplane.params import (
     SERIALIZED_DATE_FORMAT,
     SERIALIZED_DATETIME_FORMAT,
     SERIALIZED_DATETIME_MILLISECONDS_FORMAT,
-    InputParamTypes,
     LabeledOption,
     ParamConfig,
     ParamDefTypes,
     ParamType,
+    ParamTypes,
     make_options,
     resolve_type,
     serialize_param,
@@ -113,7 +113,7 @@ class Schedule:
     cron: str
     name: Optional[str] = None
     description: Optional[str] = None
-    param_values: Optional[Dict[str, Optional[InputParamTypes]]] = None
+    param_values: Optional[Dict[str, Optional[ParamTypes]]] = None
 
 
 def task(
@@ -360,6 +360,13 @@ class TaskDef:
                     raise UnsupportedDefaultTypeException(
                         "File defaults are not currently supported with inline code configuration."
                     )
+            if param_config.default is not None and param_config.default != default:
+                raise InvalidTaskConfigurationException(
+                    f"Function {func.__name__} contains an invalid default value configuration "
+                    f"for parameter {param.name}. Default values should be set via the Python "
+                    "native default function parameter syntax, e.g. "
+                    '`def my_task(my_param: str = "default")` instead of inside `ParamConfig`.'
+                )
 
             default_slug = make_slug(param.name)
             parameters.append(

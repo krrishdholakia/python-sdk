@@ -9,6 +9,6 @@ from airplane.config import EnvVar, Resource, Schedule, task
 from airplane.exceptions import InvalidEnvironmentException, RunPendingException
 from airplane.output import append_output, set_output, write_named_output, write_output
 from airplane.params import LabeledOption, ParamConfig
-from airplane.runtime import execute
+from airplane.runtime import execute, prompt
 from airplane.runtime.standard import run  # Deprecated
 from airplane.types import SQL, ConfigVar, File, LongText

@@ -1,15 +1,18 @@
+import dataclasses
 import os
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import requests
 from requests import Response
 from requests.models import HTTPError
 
 from airplane._version import __version__
+from airplane.api.entities import PromptReviewers
 from airplane.exceptions import InvalidEnvironmentException
-from airplane.params import InputParamTypes, serialize_param
+from airplane.params import ParamTypes, SerializedParam, serialize_param
+from airplane.types import JSONType
 
 
 @dataclass(frozen=True)
@@ -73,7 +76,7 @@ class APIClient:
     def execute_task(
         self,
         slug: str,
-        param_values: Optional[Dict[str, InputParamTypes]] = None,
+        param_values: Optional[Dict[str, ParamTypes]] = None,
         resources: Optional[Dict[str, str]] = None,
     ) -> str:
         """Executes an Airplane task with parameters and resources from a task slug.
@@ -166,7 +169,7 @@ class APIClient:
 
     def create_json_display(
         self,
-        payload: Union[Dict[str, Any], List[Any], int, str, float, bool, None],
+        payload: JSONType,
     ) -> str:
         """Creates a json display.
 
@@ -211,6 +214,62 @@ class APIClient:
         )
         self.__maybe_error_on_response(resp)
         return resp.json()["id"]
+
+    def create_prompt(
+        self,
+        parameters: List[SerializedParam],
+        reviewers: Optional[PromptReviewers],
+        confirm_text: Optional[str],
+        cancel_text: Optional[str],
+        description: Optional[str],
+    ) -> str:
+        """Creates an Airplane prompt.
+
+        Args:
+            parameters: List of parameters.
+            reviewers: Reviewers that are allowed to approve the prompt.
+            confirm_text: Text of the confirmation button on the prompt dialog.
+            cancel_text: Text of the cancellation button on the prompt dialog.
+            description: Prompt description to display. Supports markdown.
+
+        Raises:
+            HTTPError: If the prompt cannot be created properly.
+        """
+        resp = requests.post(
+            f"{self._api_host}/v0/prompts/create",
+            json={
+                "schema": {
+                    "parameters": [dataclasses.asdict(p) for p in parameters],
+                },
+                "reviewers": reviewers,
+                "confirmText": confirm_text,
+                "cancelText": cancel_text,
+                "description": description,
+            },
+            headers=self._headers,
+        )
+        self.__maybe_error_on_response(resp)
+        return resp.json()["id"]
+
+    def get_prompt(self, prompt_id: str) -> Dict[str, Any]:
+        """Fetches an Airplane prompt.
+
+        Args:
+            prompt_id: The id of the prompt to fetch.
+
+        Returns:
+            The Airplane prompt's attributes.
+
+        Raises:
+            HTTPError: If the prompt cannot be fetched.
+        """
+        resp = requests.get(
+            f"{self._api_host}/v0/prompts/get",
+            params={"id": prompt_id},
+            headers=self._headers,
+        )
+        self.__maybe_error_on_response(resp)
+        return resp.json()["prompt"]
 
     @classmethod
     def __maybe_error_on_response(cls, resp: Response) -> None:
