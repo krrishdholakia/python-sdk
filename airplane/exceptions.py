@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from textwrap import dedent
 from typing import Optional
 
+from airplane.api.entities import Run
+
 
 class RunPendingException(Exception):
     """Exception that indicates a run is still in pending state."""
@@ -34,10 +36,14 @@ class UnknownResourceAliasException(Exception):
 class RunTerminationException(Exception):
     """Exception that indicates a run failed or was cancelled."""
 
-    status: str
+    run: Run
 
     def __str__(self) -> str:
-        return f"Run {str(self.status).lower()}"
+        if isinstance(self.run.output, dict) and isinstance(
+            self.run.output.get("error"), str
+        ):
+            return self.run.output["error"]
+        return f"Run {str(self.run.status.value).lower()}"
 
 
 @dataclass

@@ -48,8 +48,8 @@ def execute(
         output=outputs,
     )
 
-    if run.status in (RunStatus.FAILED, RunStatus.CANCELLED):
-        raise RunTerminationException(run.status.value)
+    if run.status in {RunStatus.FAILED, RunStatus.CANCELLED}:
+        raise RunTerminationException(run)
 
     return run
 
