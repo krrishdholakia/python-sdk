@@ -144,7 +144,11 @@ class ParamConfig:
     default: Optional[ParamTypes] = None
 
 
-def to_airplane_type(func_name: str, param_name: str, type_hint: Any) -> ParamType:
+def to_airplane_type(
+    param_name: str,
+    type_hint: Any,
+    func_name: Optional[str] = None,
+) -> ParamType:
     """Converts a Python type hint to an Airplane type."""
     if type_hint == str:
         return "shorttext"
@@ -175,7 +179,9 @@ def to_airplane_type(func_name: str, param_name: str, type_hint: Any) -> ParamTy
 
 
 def to_serialized_airplane_type(
-    param_name: str, type_hint: Any
+    param_name: str,
+    type_hint: Any,
+    func_name: Optional[str] = None,
 ) -> Tuple[SerializedParamType, Optional[SerializedParamComponent]]:
     """Converts a Python type hint to a serialized Airplane type."""
     if type_hint == str:
@@ -201,6 +207,7 @@ def to_serialized_airplane_type(
 
     raise InvalidAnnotationException(
         prefix=f"Invalid type annotation `{type_hint}`",
+        func_name=func_name,
         param_name=param_name,
     )
 
@@ -222,8 +229,10 @@ def resolve_type(
                 func_name=func_name,
                 param_name=param_name,
             )
-        underlying_type, _, _ = resolve_type(param_name, type_args[0], func_name)
-        return underlying_type, True, None
+        underlying_type, _, param_config = resolve_type(
+            param_name, type_args[0], func_name
+        )
+        return underlying_type, True, param_config
 
     if origin_type == Annotated:
         type_args = get_args(type_hint)

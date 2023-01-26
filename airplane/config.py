@@ -375,7 +375,7 @@ class TaskDef:
                     # Parameter slug is the parameter's name in snakecase
                     slug=param_config.slug or default_slug,
                     name=param_config.name or inflection.humanize(default_slug),
-                    type=to_airplane_type(func.__name__, param.name, resolved_type),
+                    type=to_airplane_type(param.name, resolved_type, func.__name__),
                     description=param_config.description
                     or param_descriptions.get(param.name),
                     required=not is_optional,

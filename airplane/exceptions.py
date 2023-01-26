@@ -55,15 +55,14 @@ class InvalidAnnotationException(Exception):
     func_name: Optional[str] = None
 
     def __str__(self) -> str:
-        source = (
-            f"function `{self.func_name}`" if self.func_name else "prompt definition"
-        )
+        source = f" from function `{self.func_name}`" if self.func_name else ""
         return dedent(
-            f"""{self.prefix} for parameter `{self.param_name}` from {source}.
+            f"""
+            {self.prefix} for parameter `{self.param_name}`{source}.
 
             Type must be one of (str, int, float, bool, datetime.date, datetime.datetime,
             airplane.LongText, airplane.File, airplane.ConfigVar, airplane.SQL,
-            Optional[T], Annotated[T, airplane.ParamConfig(...)]).
+            Optional[T], or Annotated[T, airplane.ParamConfig(...)]).
             """
         )
 
