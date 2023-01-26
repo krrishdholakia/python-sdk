@@ -4,9 +4,8 @@ from typing import List, Union, cast
 
 from typing_extensions import TypedDict
 
-from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import __execute_internal
+from airplane.execute import Run, execute
 
 
 @dataclass
@@ -35,7 +34,7 @@ def message(
     subject: str = "",
     message: str = "",  # pylint: disable=redefined-outer-name
     dedent: bool = True,
-) -> BuiltInRun[MessageOutput]:
+) -> Run[MessageOutput]:
     """Runs the builtin message function against an email Airplane resource.
 
     Args:
@@ -56,8 +55,8 @@ def message(
     if dedent:
         message = textwrap.dedent(message)
     return cast(
-        BuiltInRun[MessageOutput],
-        __execute_internal(
+        Run[MessageOutput],
+        execute(
             "airplane:email_message",
             {
                 "sender": asdict(sender),

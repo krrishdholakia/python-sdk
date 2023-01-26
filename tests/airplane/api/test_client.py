@@ -2,7 +2,7 @@ import json
 import os
 import re
 import time
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, Tuple, Union
 from unittest import mock
 
 import pytest
@@ -12,7 +12,7 @@ from requests import PreparedRequest, Response
 from requests.structures import CaseInsensitiveDict
 from responses.matchers import json_params_matcher
 
-from airplane.api.client import (
+from airplane.client import (
     APIClient,
     ClientOpts,
     _compute_retry_delay,
@@ -277,7 +277,7 @@ def test_client_error() -> None:
 
 
 @responses.activate
-@mock.patch("airplane.api.client._compute_retry_delay")
+@mock.patch("airplane.client._compute_retry_delay")
 def test_client_retries(mocked_retry_delay: mock.MagicMock) -> None:
     mocked_retry_delay.return_value = 0.01  # 10ms
     responses.post(
@@ -308,7 +308,7 @@ def test_client_retries(mocked_retry_delay: mock.MagicMock) -> None:
 
 
 @responses.activate
-@mock.patch("airplane.api.client._compute_retry_delay")
+@mock.patch("airplane.client._compute_retry_delay")
 def test_client_airplane_retryable(mocked_retry_delay: mock.MagicMock) -> None:
     mocked_retry_delay.return_value = 0.01  # 10ms
     responses.post(
@@ -390,7 +390,7 @@ def test_client_retry_after() -> None:
 
 
 @responses.activate
-@mock.patch("airplane.api.client._compute_retry_delay")
+@mock.patch("airplane.client._compute_retry_delay")
 def test_client_timeout(mocked_retry_delay: mock.MagicMock) -> None:
     mocked_retry_delay.return_value = 0.01  # 10ms
     responses.post(
@@ -422,6 +422,10 @@ def test_parse_retry_after() -> None:
     resp = Response()
     resp.headers["Retry-After"] = "broken"
     assert _parse_retry_after(resp) == 0
+
+
+from airplane import InvalidEnvironmentException
+from airplane.client import api_client_from_env, client_opts_from_env
 
 
 @mock.patch.dict(

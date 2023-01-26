@@ -1,15 +1,14 @@
 import textwrap
 from typing import cast
 
-from airplane.api.entities import BuiltInRun
-from airplane.runtime import __execute_internal
+from airplane.execute import Run, execute
 
 
 def message(
     channel_name: str,
     message: str,  # pylint: disable=redefined-outer-name
     dedent: bool = True,
-) -> BuiltInRun[None]:
+) -> Run[None]:
     """Runs the builtin message function against a Slack Airplane resource.
 
     Args:
@@ -27,8 +26,8 @@ def message(
     if dedent:
         message = textwrap.dedent(message)
     return cast(
-        BuiltInRun[None],
-        __execute_internal(
+        Run[None],
+        execute(
             "airplane:slack_message",
             {
                 "channelName": channel_name,

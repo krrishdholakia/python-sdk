@@ -6,7 +6,6 @@ import pytest
 from typing_extensions import Annotated
 
 from airplane._version import __version__
-from airplane.api.entities import Run, RunStatus
 from airplane.config import (
     EnvVar,
     LabeledOption,
@@ -22,7 +21,7 @@ from airplane.exceptions import (
     InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
-from airplane.types import SQL, ConfigVar, File, LongText
+from airplane.types import SQL, ConfigVar, File, LongText, Run, RunStatus
 from airplane.utils import make_slug
 
 # pylint: disable=protected-access

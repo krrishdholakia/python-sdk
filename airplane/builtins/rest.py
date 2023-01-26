@@ -3,9 +3,8 @@ from typing import Any, Dict, Optional, Union, cast
 
 from typing_extensions import TypedDict
 
-from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import __execute_internal
+from airplane.execute import Run, execute
 
 
 class Method(Enum):
@@ -44,7 +43,7 @@ def request(
     body: Optional[Union[Dict[str, Any], str]] = None,
     form_data: Optional[Dict[str, Any]] = None,
     retry_failures: bool = False,
-) -> BuiltInRun[RequestOutput]:
+) -> Run[RequestOutput]:
     """Runs the builtin request function against a REST Airplane resource.
 
     Args:
@@ -67,8 +66,8 @@ def request(
     """
 
     return cast(
-        BuiltInRun[RequestOutput],
-        __execute_internal(
+        Run[RequestOutput],
+        execute(
             "airplane:rest_request",
             {
                 "method": method.value,

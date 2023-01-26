@@ -2,9 +2,8 @@ from typing import Any, Dict, List, Optional, cast
 
 from typing_extensions import TypedDict
 
-from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import __execute_internal
+from airplane.execute import Run, execute
 
 
 def find(
@@ -15,7 +14,7 @@ def find(
     sort: Optional[Dict[str, Any]] = None,
     skip: Optional[int] = None,
     limit: Optional[int] = None,
-) -> BuiltInRun[List[Dict[str, Any]]]:
+) -> Run[List[Dict[str, Any]]]:
     """Runs the find function against a MongoDB Airplane resource.
 
     Args:
@@ -36,8 +35,8 @@ def find(
     """
 
     return cast(
-        BuiltInRun[List[Dict[str, Any]]],
-        __execute_internal(
+        Run[List[Dict[str, Any]]],
+        execute(
             "airplane:mongodb_find",
             {
                 "collection": collection,
@@ -58,7 +57,7 @@ def find_one(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> BuiltInRun[Optional[Dict[str, Any]]]:
+) -> Run[Optional[Dict[str, Any]]]:
     """Runs the findOne function against a MongoDB Airplane resource.
 
     Args:
@@ -77,8 +76,8 @@ def find_one(
     """
 
     return cast(
-        BuiltInRun[Optional[Dict[str, Any]]],
-        __execute_internal(
+        Run[Optional[Dict[str, Any]]],
+        execute(
             "airplane:mongodb_findOne",
             {
                 "collection": collection,
@@ -97,7 +96,7 @@ def find_one_and_delete(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> BuiltInRun[Optional[Dict[str, Any]]]:
+) -> Run[Optional[Dict[str, Any]]]:
     """Runs the findOneAndDelete function against a MongoDB Airplane resource.
 
     Args:
@@ -116,8 +115,8 @@ def find_one_and_delete(
     """
 
     return cast(
-        BuiltInRun[Optional[Dict[str, Any]]],
-        __execute_internal(
+        Run[Optional[Dict[str, Any]]],
+        execute(
             "airplane:mongodb_findOneAndDelete",
             {
                 "collection": collection,
@@ -137,7 +136,7 @@ def find_one_and_update(
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
-) -> BuiltInRun[Optional[Dict[str, Any]]]:
+) -> Run[Optional[Dict[str, Any]]]:
     """Runs the findOneAndUpdate function against a MongoDB Airplane resource.
 
     Args:
@@ -157,8 +156,8 @@ def find_one_and_update(
     """
 
     return cast(
-        BuiltInRun[Optional[Dict[str, Any]]],
-        __execute_internal(
+        Run[Optional[Dict[str, Any]]],
+        execute(
             "airplane:mongodb_findOneAndUpdate",
             {
                 "collection": collection,
@@ -180,7 +179,7 @@ def find_one_and_replace(
     projection: Optional[Dict[str, Any]] = None,
     sort: Optional[Dict[str, Any]] = None,
     upsert: Optional[bool] = None,
-) -> BuiltInRun[Optional[Dict[str, Any]]]:
+) -> Run[Optional[Dict[str, Any]]]:
     """Runs the findOneAndReplace function against a MongoDB Airplane resource.
 
     Args:
@@ -201,8 +200,8 @@ def find_one_and_replace(
     """
 
     return cast(
-        BuiltInRun[Optional[Dict[str, Any]]],
-        __execute_internal(
+        Run[Optional[Dict[str, Any]]],
+        execute(
             "airplane:mongodb_findOneAndReplace",
             {
                 "collection": collection,
@@ -227,7 +226,7 @@ def insert_one(
     mongodb_resource: str,
     collection: str,
     document: Dict[str, Any],
-) -> BuiltInRun[InsertOneOutput]:
+) -> Run[InsertOneOutput]:
     """Runs the insertOne function against a MongoDB Airplane resource.
 
     Args:
@@ -244,8 +243,8 @@ def insert_one(
     """
 
     return cast(
-        BuiltInRun[InsertOneOutput],
-        __execute_internal(
+        Run[InsertOneOutput],
+        execute(
             "airplane:mongodb_insertOne",
             {
                 "collection": collection,
@@ -266,7 +265,7 @@ def insert_many(
     mongodb_resource: str,
     collection: str,
     documents: List[Dict[str, Any]],
-) -> BuiltInRun[InsertManyOutput]:
+) -> Run[InsertManyOutput]:
     """Runs the insertMany function against a MongoDB Airplane resource.
 
     Args:
@@ -283,8 +282,8 @@ def insert_many(
     """
 
     return cast(
-        BuiltInRun[InsertManyOutput],
-        __execute_internal(
+        Run[InsertManyOutput],
+        execute(
             "airplane:mongodb_insertMany",
             {
                 "collection": collection,
@@ -310,7 +309,7 @@ def update_one(
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     upsert: Optional[bool] = None,
-) -> BuiltInRun[UpdateOutput]:
+) -> Run[UpdateOutput]:
     """Runs the updateOne function against a MongoDB Airplane resource.
 
     Args:
@@ -329,8 +328,8 @@ def update_one(
     """
 
     return cast(
-        BuiltInRun[UpdateOutput],
-        __execute_internal(
+        Run[UpdateOutput],
+        execute(
             "airplane:mongodb_updateOne",
             {
                 "collection": collection,
@@ -349,7 +348,7 @@ def update_many(
     update: Dict[str, Any],
     filter: Optional[Dict[str, Any]] = None,  # pylint: disable=redefined-builtin
     upsert: Optional[bool] = None,
-) -> BuiltInRun[UpdateOutput]:
+) -> Run[UpdateOutput]:
     """Runs the updateMany function against a MongoDB Airplane resource.
 
     Args:
@@ -368,8 +367,8 @@ def update_many(
     """
 
     return cast(
-        BuiltInRun[UpdateOutput],
-        __execute_internal(
+        Run[UpdateOutput],
+        execute(
             "airplane:mongodb_updateMany",
             {
                 "collection": collection,
@@ -392,7 +391,7 @@ def delete_one(
     mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> BuiltInRun[DeleteOutput]:
+) -> Run[DeleteOutput]:
     """Runs the deleteOne function against a MongoDB Airplane resource.
 
     Args:
@@ -409,8 +408,8 @@ def delete_one(
     """
 
     return cast(
-        BuiltInRun[DeleteOutput],
-        __execute_internal(
+        Run[DeleteOutput],
+        execute(
             "airplane:mongodb_deleteOne",
             {
                 "collection": collection,
@@ -425,7 +424,7 @@ def delete_many(
     mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> BuiltInRun[DeleteOutput]:
+) -> Run[DeleteOutput]:
     """Runs the deleteMany function against a MongoDB Airplane resource.
 
     Args:
@@ -442,8 +441,8 @@ def delete_many(
     """
 
     return cast(
-        BuiltInRun[DeleteOutput],
-        __execute_internal(
+        Run[DeleteOutput],
+        execute(
             "airplane:mongodb_deleteMany",
             {
                 "collection": collection,
@@ -458,7 +457,7 @@ def aggregate(
     mongodb_resource: str,
     collection: str,
     pipeline: List[Dict[str, Any]],
-) -> BuiltInRun[List[Dict[str, Any]]]:
+) -> Run[List[Dict[str, Any]]]:
     """Runs the aggregate function against a MongoDB Airplane resource.
 
     Args:
@@ -475,8 +474,8 @@ def aggregate(
     """
 
     return cast(
-        BuiltInRun[List[Dict[str, Any]]],
-        __execute_internal(
+        Run[List[Dict[str, Any]]],
+        execute(
             "airplane:mongodb_aggregate",
             {
                 "collection": collection,
@@ -491,7 +490,7 @@ def count_documents(
     mongodb_resource: str,
     collection: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> BuiltInRun[float]:
+) -> Run[float]:
     """Runs the countDocuments function against a MongoDB Airplane resource.
 
     Args:
@@ -508,8 +507,8 @@ def count_documents(
     """
 
     return cast(
-        BuiltInRun[float],
-        __execute_internal(
+        Run[float],
+        execute(
             "airplane:mongodb_countDocuments",
             {
                 "collection": collection,
@@ -525,7 +524,7 @@ def distinct(
     collection: str,
     field: str,
     filter: Dict[str, Any],  # pylint: disable=redefined-builtin
-) -> BuiltInRun[List[Any]]:
+) -> Run[List[Any]]:
     """Runs the distinct function against a MongoDB Airplane resource.
 
     Args:
@@ -543,8 +542,8 @@ def distinct(
     """
 
     return cast(
-        BuiltInRun[List[Any]],
-        __execute_internal(
+        Run[List[Any]],
+        execute(
             "airplane:mongodb_distinct",
             {
                 "collection": collection,

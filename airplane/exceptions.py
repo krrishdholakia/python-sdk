@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from textwrap import dedent
-from typing import Optional
+from typing import Any, Optional
 
-from airplane.api.entities import Run
+from airplane.types import Run
 
 TASK_MUST_BE_REQUESTED_ERROR_CODE = "task_must_be_requested"
 
@@ -54,7 +54,7 @@ class UnknownResourceAliasException(Exception):
 class RunTerminationException(Exception):
     """Exception that indicates a run failed or was cancelled."""
 
-    run: Run
+    run: Run[Any]
 
     def __str__(self) -> str:
         if isinstance(self.run.output, dict) and isinstance(

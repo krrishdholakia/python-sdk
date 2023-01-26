@@ -10,28 +10,26 @@ import typing_extensions
 from docstring_parser import parse
 from typing_extensions import Literal, ParamSpec
 
-from airplane.api.entities import Run
 from airplane.exceptions import (
     InvalidAnnotationException,
     InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
+from airplane.execute import execute
 from airplane.params import (
     SERIALIZED_DATE_FORMAT,
     SERIALIZED_DATETIME_FORMAT,
     SERIALIZED_DATETIME_MILLISECONDS_FORMAT,
+    InputParam,
     LabeledOption,
     ParamConfig,
-    ParamDefTypes,
     ParamType,
-    ParamTypes,
     make_options,
     resolve_type,
     serialize_param,
     to_airplane_type,
 )
-from airplane.runtime import execute
-from airplane.types import ConfigVar, File, RuntimeType
+from airplane.types import ConfigVar, File, Run, RuntimeType
 from airplane.utils import make_slug
 
 # Restrict task execution so it can only be called from other tasks or views.
@@ -117,7 +115,7 @@ class Schedule:
     cron: str
     name: Optional[str] = None
     description: Optional[str] = None
-    param_values: Optional[Dict[str, Optional[ParamTypes]]] = None
+    param_values: Optional[Dict[str, Optional[InputParam]]] = None
 
 
 P = ParamSpec("P")
@@ -238,6 +236,8 @@ def task(
 
 
 # ParamDefs have a subset of types that are built in and serializable.
+ParamDefs = Union[str, int, float]
+
 ParamDefOptions = Union[
     List[LabeledOption[str]],
     List[LabeledOption[int]],
@@ -256,7 +256,7 @@ class ParamDef:
     name: str
     type: ParamType
     description: Optional[str]
-    default: Optional[ParamDefTypes]
+    default: Optional[ParamDefs]
     required: Optional[bool]
     options: Optional[ParamDefOptions]
     regex: Optional[str]

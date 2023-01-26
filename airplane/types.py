@@ -1,5 +1,18 @@
 import dataclasses
-from typing import TYPE_CHECKING, Any, Callable, List, Mapping, NewType, TypeVar, Union
+from enum import Enum
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    NewType,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import Literal
 
@@ -8,6 +21,12 @@ JSONType = Union[None, int, float, str, bool, List[Any], Mapping[str, Any]]
 RuntimeType = Literal["", "workflow"]
 
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
+
+
+JSONTypeT = TypeVar(
+    "JSONTypeT",
+    bound=JSONType,
+)
 
 
 if TYPE_CHECKING:
@@ -55,3 +74,73 @@ class ConfigVar:
 
     name: str
     value: str
+
+
+@dataclasses.dataclass
+class PromptReviewers:
+    """Reviewers that are allowed to approve the prompt.
+
+    Args:
+        groups: List of groups allowed to approve the prompt. Groups are
+            referenced via their slugs.
+        users: List of users allowed to approve the prompt. Users are
+            referenced via their emails.
+        allow_self_approvals: Whether or not the run creator is allowed to approve
+            their own prompt.
+    """
+
+    groups: Optional[List[str]] = None
+    users: Optional[List[str]] = None
+    allow_self_approvals: bool = True
+
+
+class RunStatus(Enum):
+    """Valid statuses during a run's lifecycle."""
+
+    NOT_STARTED = "NotStarted"
+    QUEUED = "Queued"
+    ACTIVE = "Active"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELLED = "Cancelled"
+
+    def is_terminal(self) -> bool:
+        """Returns whether the status is terminal.
+
+        Returns:
+            Whether the status is terminal.
+        """
+
+        return self in [self.SUCCEEDED, self.FAILED, self.CANCELLED]
+
+
+@dataclasses.dataclass
+class TaskReviewer:
+    """Reviewers that are allowed to approve the task.
+
+    Args:
+        group_id: The ID of the group allowed to approve the task.o
+        user_id: The ID of the user allowed to approve the task.
+    """
+
+    group_id: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+@dataclasses.dataclass
+class Run(Generic[JSONTypeT]):
+    """Representation of an Airplane run.
+
+    Attributes:
+        id: The id of the run.
+        task_id: The task id associated with the run (None for builtin tasks).
+        param_values: The param values the run was provided.
+        status: The current status of the run.
+        output: The outputs (if any) of the run.
+    """
+
+    id: str
+    task_id: Optional[str]
+    param_values: Dict[str, Any]
+    status: RunStatus
+    output: JSONType

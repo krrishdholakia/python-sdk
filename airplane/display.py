@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 import deprecation
 
 from airplane._version import __version__
-from airplane.api.client import api_client_from_env
+from airplane.client import api_client_from_env
 from airplane.types import File, JSONType
 
 

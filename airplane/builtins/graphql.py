@@ -2,9 +2,8 @@ from typing import Any, Dict, List, Optional, cast
 
 from typing_extensions import TypedDict
 
-from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import __execute_internal
+from airplane.execute import Run, execute
 
 
 class RequestOutput(TypedDict):
@@ -21,7 +20,7 @@ def request(
     headers: Optional[Dict[str, Any]] = None,
     url_params: Optional[Dict[str, Any]] = None,
     retry_failures: bool = False,
-) -> BuiltInRun[RequestOutput]:
+) -> Run[RequestOutput]:
     """Runs the builtin request function against a GraphQL Airplane resource.
 
     Args:
@@ -41,8 +40,8 @@ def request(
     """
 
     return cast(
-        BuiltInRun[RequestOutput],
-        __execute_internal(
+        Run[RequestOutput],
+        execute(
             "airplane:graphql_request",
             {
                 "operation": operation,

@@ -2,9 +2,8 @@ import textwrap
 from enum import Enum
 from typing import Any, Dict, Optional, cast
 
-from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import __execute_internal
+from airplane.execute import Run, execute
 
 
 class TransactionMode(Enum):
@@ -22,7 +21,7 @@ def query(
     query_args: Optional[Dict[str, Any]] = None,
     transaction_mode: TransactionMode = TransactionMode.AUTO,
     dedent: bool = True,
-) -> BuiltInRun[Dict[str, Any]]:
+) -> Run[Dict[str, Any]]:
     """Runs the builtin query function against a SQL Airplane resource.
 
     Args:
@@ -66,8 +65,8 @@ def query(
     if dedent:
         query = textwrap.dedent(query)
     return cast(
-        BuiltInRun[Dict[str, Any]],
-        __execute_internal(
+        Run[Dict[str, Any]],
+        execute(
             "airplane:sql_query",
             {
                 "query": query,

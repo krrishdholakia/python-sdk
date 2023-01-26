@@ -10,7 +10,7 @@ import airplane
     {"AIRPLANE_RESOURCES": '{"foo": {"id": "bar"}}', "AIRPLANE_RESOURCES_VERSION": "2"},
 )
 @mock.patch(
-    "airplane.sql.__execute_internal",
+    "airplane.sql.execute",
     return_value=airplane.Run("baz", None, {}, airplane.RunStatus.SUCCEEDED, None),
 )
 def test_query(mock_execute_internal: Any) -> None:

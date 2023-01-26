@@ -12,20 +12,8 @@ SERIALIZED_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 SERIALIZED_DATETIME_MILLISECONDS_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
-ParamType = Literal[
-    "shorttext",
-    "longtext",
-    "sql",
-    "boolean",
-    "upload",
-    "integer",
-    "float",
-    "date",
-    "datetime",
-    "configvar",
-]
-
-ParamTypes = Union[
+# Types users can provide for a parameter value.
+InputParam = Union[
     str,
     LongText,
     SQL,
@@ -70,7 +58,19 @@ SerializedParamComponent = Union[
     Literal["textarea"],
 ]
 
-SerializedParamValue = Union[str, bool, int, float, None]
+ParamType = Literal[
+    "shorttext",
+    "longtext",
+    "sql",
+    "boolean",
+    "upload",
+    "integer",
+    "float",
+    "date",
+    "datetime",
+    "configvar",
+]
+SerializedParamValue = Union[str, bool, int, float]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -97,7 +97,7 @@ class SerializedParam:
 
 DefaultParamT = TypeVar(
     "DefaultParamT",
-    bound=ParamTypes,
+    bound=InputParam,
 )
 
 
@@ -153,7 +153,7 @@ class ParamConfig:
     description: Optional[str] = None
     options: Optional[AllOptions] = None
     regex: Optional[str] = None
-    default: Optional[ParamTypes] = None
+    default: Optional[InputParam] = None
 
 
 def to_airplane_type(
@@ -264,8 +264,6 @@ def resolve_type(
     return type_hint, False, None
 
 
-ParamDefTypes = Union[str, int, float]
-
 # ParamDefs have a subset of types that are built in and serializable.
 ParamDefOptions = Union[
     List[LabeledOption[str]],
@@ -275,8 +273,8 @@ ParamDefOptions = Union[
 
 
 def serialize_param(
-    val: ParamTypes,
-) -> ParamDefTypes:
+    val: InputParam,
+) -> SerializedParamValue:
     """Transforms a general parameter into a format supported by parameter definition"""
     if isinstance(val, datetime.datetime):
         return val.strftime(SERIALIZED_DATETIME_FORMAT)

@@ -18,8 +18,14 @@ from airplane.exceptions import (
     InvalidEnvironmentException,
     InvalidZoneException,
 )
-from airplane.params import ParamTypes, SerializedParam, serialize_param
-from airplane.types import File, JSONType
+from airplane.params import (
+    InputParam,
+    ParamTypes,
+    SerializedParam,
+    SerializedParamValue,
+    serialize_param,
+)
+from airplane.types import File, JSONType, PromptReviewers, TaskReviewer
 
 
 @dataclass(frozen=True)
@@ -35,6 +41,14 @@ class ClientOpts:
     sandbox_token: str = ""
     # The timeout to apply to each HTTP request.
     timeout_seconds: float = 10
+
+    def __post_init__(self) -> None:
+        if not self.api_host:
+            raise InvalidEnvironmentException("Must set api_host.")
+        if not self.api_token:
+            raise InvalidEnvironmentException("Must set api_token.")
+        if not self.env_id:
+            raise InvalidEnvironmentException("Must set env_id.")
 
 
 class APIClient:
@@ -85,7 +99,7 @@ class APIClient:
     def execute_task(
         self,
         slug: str,
-        param_values: Optional[Dict[str, ParamTypes]] = None,
+        param_values: Optional[Dict[str, Optional[InputParam]]] = None,
         resources: Optional[Dict[str, str]] = None,
     ) -> str:
         """Executes an Airplane task with parameters and resources from a task slug.
@@ -103,9 +117,11 @@ class APIClient:
             requests.exceptions.Timeout: If the request times out.
             requests.exceptions.ConnectionError: If a network error occurs.
         """
-        serialized_params = {}
+        serialized_params: Dict[str, SerializedParamValue] = {}
         for key, val in (param_values or {}).items():
-            serialized_params[key] = serialize_param(val)
+            if val is not None:
+                serialized_params[key] = serialize_param(val)
+
         resp = self.__request(
             "POST",
             "/v0/tasks/execute",
@@ -138,7 +154,7 @@ class APIClient:
         )
         return resp
 
-    def get_run_output(self, run_id: str) -> Any:
+    def get_run_output(self, run_id: str) -> JSONType:
         """Fetches an Airplane run's output from the Airplane API.
 
         Args:
@@ -447,7 +463,7 @@ class APIClient:
     def create_task_request(
         self,
         trigger_id: str,
-        param_values: Optional[Dict[str, ParamTypes]] = None,
+        param_values: Optional[Dict[str, Optional[InputParam]]] = None,
         reason: Optional[str] = None,
         reviewers: Optional[List[TaskReviewer]] = None,
     ) -> str:
@@ -467,9 +483,11 @@ class APIClient:
             requests.exceptions.Timeout: If the request times out.
             requests.exceptions.ConnectionError: If a network error occurs.
         """
-        serialized_params = {}
+        serialized_params: Dict[str, SerializedParamValue] = {}
         for key, val in (param_values or {}).items():
-            serialized_params[key] = serialize_param(val)
+            if val is not None:
+                serialized_params[key] = serialize_param(val)
+
         resp = self.__request(
             "POST",
             "/v0/requests/create",
@@ -661,11 +679,11 @@ def api_client_from_env() -> APIClient:
     Raises:
         InvalidEnvironmentException: If the environment is improperly configured.
     """
-    return api_client(client_opts_from_env())
+    return _api_client(client_opts_from_env)
 
 
 @lru_cache(maxsize=None)
-def api_client(opts: ClientOpts) -> APIClient:
+def _api_client(opts: ClientOpts) -> APIClient:
     """Creates an APIClient
 
     Args:

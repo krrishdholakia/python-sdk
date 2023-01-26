@@ -1,9 +1,9 @@
-from airplane.api.entities import Run, RunStatus
 from airplane.exceptions import RunTerminationException
+from airplane.types import JSONType, Run, RunStatus
 
 
 def test_run_termination_error() -> None:
-    run = Run(
+    run = Run[JSONType](
         id="run123",
         output="hello world",
         param_values={"name": "world"},
@@ -17,7 +17,7 @@ def test_run_termination_error() -> None:
         assert err.run == run
         assert str(err) == "Run failed"
 
-    run = Run(
+    run = Run[JSONType](
         id="run123",
         output={"error": "Oops!"},
         param_values={"name": "world"},
