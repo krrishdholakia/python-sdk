@@ -1,26 +1,25 @@
 repos:
-- repo: https://github.com/pycqa/isort
-  rev: 5.10.1
-  hooks:
-    - id: isort
-      name: isort (python)
-- repo: https://github.com/psf/black
-  rev: 22.3.0
-  hooks:
-  - id: black
-- repo: https://github.com/pycqa/pylint
-  rev: v2.13.9
-  hooks:
-  - id: pylint
-    language: system
-    exclude: ^tests/
-    args:
-      [
-        "-rn", # Only display messages
-        "-sn", # Don't show the score
-      ]
-- repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v0.960
-  hooks:
-  - id: mypy
-    additional_dependencies: [types-requests==2.27.29]
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.5
+    hooks:
+      - id: isort
+        name: isort (python)
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+  - repo: https://github.com/pycqa/pylint
+    rev: v2.13.9
+    hooks:
+      - id: pylint
+        language: system
+        exclude: ^tests/
+        args: [
+            "-rn", # Only display messages
+            "-sn", # Don't show the score
+          ]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.960
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-requests==2.27.29]

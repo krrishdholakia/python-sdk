@@ -241,7 +241,13 @@ class APIClient:
                 "schema": {
                     "parameters": [dataclasses.asdict(p) for p in parameters],
                 },
-                "reviewers": reviewers,
+                "reviewers": {
+                    "users": reviewers.users,
+                    "groups": reviewers.groups,
+                    "allowSelfApproval": reviewers.allow_self_approvals,
+                }
+                if reviewers
+                else None,
                 "confirmText": confirm_text,
                 "cancelText": cancel_text,
                 "description": description,
