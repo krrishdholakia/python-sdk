@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "airplanesdk"
-version = "0.3.16"
+version = "0.3.17"
 description = "A Python SDK for writing Airplane tasks"
 authors = ["Airplane <support@airplane.dev>"]
 license = "MIT"
