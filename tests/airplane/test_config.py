@@ -1,5 +1,4 @@
 import datetime
-import os
 from typing import Any, Dict, Optional, Union
 from unittest import mock
 
@@ -64,76 +63,32 @@ def test_definition_with_defaults() -> None:
     )
 
 
-@mock.patch.dict(
-    os.environ,
-    {
-        "AIRPLANE_API_HOST": "https://api.airplane.dev",
-        "AIRPLANE_TOKEN": "foo_token",
-        "AIRPLANE_ENV_ID": "foo_env",
-    },
-)
-@mock.patch("requests.get")
-@mock.patch("requests.post")
-def test_call(mocked_post: mock.MagicMock, mocked_get: mock.MagicMock) -> None:
+@mock.patch("airplane.config.execute")
+def test_call(mocked_execute: mock.MagicMock) -> None:
     @task()
     def my_task(param: str, param_other: str) -> str:
         del param_other
         return param
 
-    mocked_post.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "runID": "run",
-        },
-    )
-    mocked_get.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "status": "Succeeded",
-            "id": "run",
-            "output": "yay",
-            "paramValues": {"param_other": "bar", "param": "foo"},
-        },
-    )
-    resp = my_task("foo", param_other="bar")
-    assert resp == Run(
-        id="run",
-        task_id=None,
-        param_values={"param_other": "bar", "param": "foo"},
+    mocked_execute.return_value = Run(
+        id="run123",
+        task_id="tsk123",
         status=RunStatus.SUCCEEDED,
-        output="yay",
-    )
-    mocked_post.assert_called_with(
-        "https://api.airplane.dev/v0/tasks/execute",
-        json={
-            "slug": "my_task",
-            "paramValues": {"param_other": "bar", "param": "foo"},
-            "resources": {},
-        },
-        headers={
-            "X-Airplane-Token": "foo_token",
-            "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": __version__,
-            "X-Airplane-Env-ID": "foo_env",
-        },
+        param_values={},
+        output=None,
     )
 
+    resp = my_task("foo", param_other="bar")
+    assert resp.id == "run123"
+
+    mocked_execute.assert_called_with("my_task", {"param_other": "bar", "param": "foo"})
+
+    # Assert the underlying function can be called directly.
     assert my_task.__airplane.func("param", "other_param") == "param"  # type: ignore
 
 
-@mock.patch.dict(
-    os.environ,
-    {
-        "AIRPLANE_API_HOST": "https://api.airplane.dev",
-        "AIRPLANE_TOKEN": "foo_token",
-        "AIRPLANE_ENV_ID": "foo_env",
-    },
-)
-@mock.patch("requests.get")
-@mock.patch("requests.post")
-def test_call_with_serialization(
-    mocked_post: mock.MagicMock, mocked_get: mock.MagicMock
-) -> None:
+@mock.patch("airplane.config.execute")
+def test_call_with_serialization(mocked_execute: mock.MagicMock) -> None:
     @task()
     def my_task(
         foo: datetime.date,
@@ -143,52 +98,31 @@ def test_call_with_serialization(
         del bar, baz
         return foo
 
-    mocked_post.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "runID": "run",
-        },
+    mocked_execute.return_value = Run(
+        id="run123",
+        task_id="tsk123",
+        status=RunStatus.SUCCEEDED,
+        param_values={},
+        output=None,
     )
-    mocked_get.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "status": "Succeeded",
-            "id": "run",
-            "output": "yay",
-            "paramValues": {},
-        },
-    )
+
     resp = my_task(
         datetime.date(2019, 8, 5),
         datetime.datetime(2019, 8, 5),
         ConfigVar("foo", "bar"),
     )
-    assert resp == Run(
-        id="run",
-        task_id=None,
-        param_values={},
-        status=RunStatus.SUCCEEDED,
-        output="yay",
-    )
-    mocked_post.assert_called_with(
-        "https://api.airplane.dev/v0/tasks/execute",
-        json={
-            "slug": "my_task",
-            "paramValues": {
-                "foo": "2019-08-05",
-                "bar": "2019-08-05T00:00:00Z",
-                "baz": "foo",
-            },
-            "resources": {},
-        },
-        headers={
-            "X-Airplane-Token": "foo_token",
-            "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": __version__,
-            "X-Airplane-Env-ID": "foo_env",
+    assert resp.id == "run123"
+
+    mocked_execute.assert_called_with(
+        "my_task",
+        {
+            "foo": datetime.date(2019, 8, 5),
+            "bar": datetime.datetime(2019, 8, 5),
+            "baz": ConfigVar("foo", "bar"),
         },
     )
 
+    # Assert the underlying function can be called directly.
     assert my_task.__airplane.func(  # type: ignore
         datetime.date(2019, 8, 5),
         datetime.datetime(2019, 8, 5),

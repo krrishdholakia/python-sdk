@@ -1,91 +1,51 @@
-import os
 from unittest import mock
 
 from typing_extensions import Annotated
 
 from airplane import SQL, LabeledOption, ParamConfig, PromptReviewers, prompt
 from airplane._version import __version__
+from airplane.params import Constraints, SerializedParam
 
 
-@mock.patch.dict(
-    os.environ,
-    {
-        "AIRPLANE_API_HOST": "https://api.airplane.dev",
-        "AIRPLANE_TOKEN": "foo_token",
-        "AIRPLANE_ENV_ID": "foo_env",
-    },
-)
-@mock.patch("requests.get")
-@mock.patch("requests.post")
-def test_empty_prompt(mocked_post: mock.MagicMock, mocked_get: mock.MagicMock) -> None:
-    mocked_post.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "id": "prompt_id",
-        },
+@mock.patch("airplane.runtime.standard.api_client_from_env")
+def test_empty_prompt(mocked_client: mock.MagicMock) -> None:
+    create_prompt = mock.Mock(return_value="prm123")
+    get_prompt = mock.Mock(
+        return_value={"submittedAt": "2021-08-18T20:00:00.000Z", "values": {}}
     )
-
-    mocked_get.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "prompt": {"submittedAt": "2021-08-18T20:00:00.000Z", "values": {}}
-        },
+    mocked_client.return_value = mock.Mock(
+        create_prompt=create_prompt, get_prompt=get_prompt
     )
 
     values = prompt()
-
-    mocked_post.assert_called_with(
-        "https://api.airplane.dev/v0/prompts/create",
-        json={
-            "schema": {"parameters": []},
-            "reviewers": None,
-            "confirmText": None,
-            "cancelText": None,
-            "description": None,
-        },
-        headers={
-            "X-Airplane-Token": "foo_token",
-            "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": __version__,
-            "X-Airplane-Env-ID": "foo_env",
-        },
-    )
     assert values == {}
 
-
-@mock.patch.dict(
-    os.environ,
-    {
-        "AIRPLANE_API_HOST": "https://api.airplane.dev",
-        "AIRPLANE_TOKEN": "foo_token",
-        "AIRPLANE_ENV_ID": "foo_env",
-    },
-)
-@mock.patch("requests.get")
-@mock.patch("requests.post")
-def test_prompt_with_parameters(
-    mocked_post: mock.MagicMock, mocked_get: mock.MagicMock
-) -> None:
-    mocked_post.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "id": "prompt_id",
-        },
+    create_prompt.assert_called_with(
+        parameters=[],
+        reviewers=None,
+        confirm_text=None,
+        cancel_text=None,
+        description=None,
     )
+    get_prompt.assert_called_with("prm123")
 
-    mocked_get.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "prompt": {
-                "submittedAt": "2021-08-18T20:00:00.000Z",
-                "values": {
-                    "foo": "foo",
-                    "bar": 1,
-                    "baz": 2,
-                    "qux": "SELECT 1",
-                },
-            }
-        },
+
+@mock.patch("airplane.runtime.standard.api_client_from_env")
+def test_prompt_with_parameters(mocked_client: mock.MagicMock) -> None:
+    create_prompt = mock.Mock(return_value="prm123")
+    get_prompt = mock.Mock(
+        return_value={
+            "submittedAt": "2021-08-18T20:00:00.000Z",
+            "values": {
+                "foo": "foo",
+                "bar": 1,
+                "baz": 2,
+                "qux": "SELECT 1",
+            },
+        }
+    )
+    mocked_client.return_value = mock.Mock(
+        create_prompt=create_prompt, get_prompt=get_prompt
     )
 
     values = prompt(
@@ -102,112 +62,63 @@ def test_prompt_with_parameters(
             "qux": SQL,
         }
     )
-
-    mocked_post.assert_called_with(
-        "https://api.airplane.dev/v0/prompts/create",
-        json={
-            "schema": {
-                "parameters": [
-                    {
-                        "slug": "foo",
-                        "name": "Foo",
-                        "type": "string",
-                        "constraints": {
-                            "optional": False,
-                            "regex": None,
-                            "options": None,
-                        },
-                        "desc": None,
-                        "component": None,
-                        "default": None,
-                    },
-                    {
-                        "slug": "bar",
-                        "name": "Bar",
-                        "type": "integer",
-                        "constraints": {
-                            "optional": False,
-                            "regex": None,
-                            "options": None,
-                        },
-                        "desc": None,
-                        "component": None,
-                        "default": None,
-                    },
-                    {
-                        "slug": "baz",
-                        "name": "Baz",
-                        "type": "integer",
-                        "constraints": {
-                            "optional": False,
-                            "regex": None,
-                            "options": [
-                                {"label": "label", "value": 1},
-                                {"label": "label2", "value": 2},
-                            ],
-                        },
-                        "desc": None,
-                        "component": None,
-                        "default": 2,
-                    },
-                    {
-                        "slug": "qux",
-                        "name": "Qux",
-                        "type": "string",
-                        "constraints": {
-                            "optional": False,
-                            "regex": None,
-                            "options": None,
-                        },
-                        "desc": None,
-                        "component": "editor-sql",
-                        "default": None,
-                    },
-                ]
-            },
-            "reviewers": None,
-            "confirmText": None,
-            "cancelText": None,
-            "description": None,
-        },
-        headers={
-            "X-Airplane-Token": "foo_token",
-            "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": __version__,
-            "X-Airplane-Env-ID": "foo_env",
-        },
-    )
     assert values == {"bar": 1, "baz": 2, "foo": "foo", "qux": "SELECT 1"}
 
-
-@mock.patch.dict(
-    os.environ,
-    {
-        "AIRPLANE_API_HOST": "https://api.airplane.dev",
-        "AIRPLANE_TOKEN": "foo_token",
-        "AIRPLANE_ENV_ID": "foo_env",
-    },
-)
-@mock.patch("requests.get")
-@mock.patch("requests.post")
-def test_prompt_with_options(
-    mocked_post: mock.MagicMock, mocked_get: mock.MagicMock
-) -> None:
-    mocked_post.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "id": "prompt_id",
-        },
+    create_prompt.assert_called_with(
+        parameters=[
+            SerializedParam(
+                slug="foo",
+                name="Foo",
+                type="string",
+                constraints=Constraints(optional=False, regex=None, options=None),
+            ),
+            SerializedParam(
+                slug="bar",
+                name="Bar",
+                type="integer",
+                constraints=Constraints(optional=False, regex=None, options=None),
+            ),
+            SerializedParam(
+                slug="baz",
+                name="Baz",
+                type="integer",
+                constraints=Constraints(
+                    optional=False,
+                    regex=None,
+                    options=[
+                        LabeledOption("label", 1),
+                        LabeledOption("label2", 2),
+                    ],
+                ),
+                default=2,
+            ),
+            SerializedParam(
+                slug="qux",
+                name="Qux",
+                type="string",
+                constraints=Constraints(optional=False, regex=None, options=None),
+                component="editor-sql",
+            ),
+        ],
+        reviewers=None,
+        confirm_text=None,
+        cancel_text=None,
+        description=None,
     )
+    get_prompt.assert_called_with("prm123")
 
-    mocked_get.return_value = mock.Mock(
-        status_code=200,
-        json=lambda: {
-            "prompt": {
-                "submittedAt": "2021-08-18T20:00:00.000Z",
-                "values": {},
-            }
-        },
+
+@mock.patch("airplane.runtime.standard.api_client_from_env")
+def test_prompt_with_options(mocked_client: mock.MagicMock) -> None:
+    create_prompt = mock.Mock(return_value="prm123")
+    get_prompt = mock.Mock(
+        return_value={
+            "submittedAt": "2021-08-18T20:00:00.000Z",
+            "values": {},
+        }
+    )
+    mocked_client.return_value = mock.Mock(
+        create_prompt=create_prompt, get_prompt=get_prompt
     )
 
     values = prompt(
@@ -220,25 +131,17 @@ def test_prompt_with_options(
             allow_self_approvals=True,
         ),
     )
-
-    mocked_post.assert_called_with(
-        "https://api.airplane.dev/v0/prompts/create",
-        json={
-            "schema": {"parameters": []},
-            "reviewers": {
-                "users": ["user1", "user2"],
-                "groups": ["group1", "group2"],
-                "allowSelfApproval": True,
-            },
-            "confirmText": "Confirm",
-            "cancelText": "Cancel",
-            "description": "Description",
-        },
-        headers={
-            "X-Airplane-Token": "foo_token",
-            "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": __version__,
-            "X-Airplane-Env-ID": "foo_env",
-        },
-    )
     assert values == {}
+
+    create_prompt.assert_called_with(
+        parameters=[],
+        reviewers=PromptReviewers(
+            users=["user1", "user2"],
+            groups=["group1", "group2"],
+            allow_self_approvals=True,
+        ),
+        confirm_text="Confirm",
+        cancel_text="Cancel",
+        description="Description",
+    )
+    get_prompt.assert_called_with("prm123")

@@ -2,5 +2,13 @@
   "python.formatting.provider": "black",
   "python.linting.mypyEnabled": true,
   "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true
+  "python.linting.pylintEnabled": true,
+  "[python]": {
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+    "editor.formatOnPaste": false,
+    "editor.formatOnSaveMode": "file"
+  },
+  "isort.args":["--profile", "black"],
 }

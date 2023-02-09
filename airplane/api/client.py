@@ -1,12 +1,16 @@
 import dataclasses
 import os
+import uuid
 from dataclasses import dataclass
 from functools import lru_cache
+from random import random
+from time import sleep
 from typing import Any, Dict, List, Optional
 
 import requests
 from requests import Response
 from requests.models import HTTPError
+from typing_extensions import Literal
 
 from airplane._version import __version__
 from airplane.api.entities import PromptReviewers
@@ -22,22 +26,23 @@ class ClientOpts:
     api_host: str
     api_token: str
     env_id: str
+    team_id: str
+    run_id: str = ""
+    tunnel_token: str = ""
+    sandbox_token: str = ""
+    # The timeout to apply to each HTTP request.
+    timeout_seconds: float = 10
 
 
 class APIClient:
-    """API Client to interact with the public Airplane API."""
+    """API client to interact with the Airplane API."""
 
-    _api_host: str
-    _headers: Dict[str, str]
+    _opts: ClientOpts
+    _version: str
 
     def __init__(self, opts: ClientOpts, version: str):
-        self._api_host = opts.api_host
-        self._headers = {
-            "X-Airplane-Token": opts.api_token,
-            "X-Airplane-Client-Kind": "sdk/python",
-            "X-Airplane-Client-Version": version,
-            "X-Airplane-Env-ID": opts.env_id,
-        }
+        self._opts = opts
+        self._version = version
 
     def create_run(
         self,
@@ -59,19 +64,20 @@ class APIClient:
 
         Raises:
             HTTPError: If the run cannot be created or executed properly.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.post(
-            f"{self._api_host}/v0/runs/create",
-            json={
+        resp = self.__request(
+            "POST",
+            "/v0/runs/create",
+            body={
                 "taskID": task_id,
                 "params": parameters,
                 "env": env or {},
                 "constraints": constraints or {},
             },
-            headers=self._headers,
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["runID"]
+        return resp["runID"]
 
     def execute_task(
         self,
@@ -91,21 +97,22 @@ class APIClient:
 
         Raises:
             HTTPError: If the run cannot be executed.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
         serialized_params = {}
         for key, val in (param_values or {}).items():
             serialized_params[key] = serialize_param(val)
-        resp = requests.post(
-            f"{self._api_host}/v0/tasks/execute",
-            json={
+        resp = self.__request(
+            "POST",
+            "/v0/tasks/execute",
+            body={
                 "slug": slug,
                 "paramValues": serialized_params,
                 "resources": resources or {},
             },
-            headers=self._headers,
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["runID"]
+        return resp["runID"]
 
     def get_run(self, run_id: str) -> Dict[str, Any]:
         """Fetches an Airplane run.
@@ -118,14 +125,15 @@ class APIClient:
 
         Raises:
             HTTPError: If the run cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.get(
-            f"{self._api_host}/v0/runs/get",
+        resp = self.__request(
+            "GET",
+            "/v0/runs/get",
             params={"id": run_id},
-            headers=self._headers,
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()
+        return resp
 
     def get_run_output(self, run_id: str) -> Any:
         """Fetches an Airplane's run output.
@@ -138,14 +146,15 @@ class APIClient:
 
         Raises:
             HTTPError: If the run outputs cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.get(
-            f"{self._api_host}/v0/runs/getOutputs",
+        resp = self.__request(
+            "GET",
+            "/v0/runs/getOutputs",
             params={"id": run_id},
-            headers=self._headers,
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["output"]
+        return resp["output"]
 
     def create_text_display(self, content: str) -> str:
         """Creates a text display.
@@ -158,14 +167,18 @@ class APIClient:
 
         Raises:
             HTTPError: If the display could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.post(
-            f"{self._api_host}/v0/displays/create",
-            json={"display": {"content": content, "kind": "markdown"}},
-            headers=self._headers,
+        resp = self.__request(
+            "POST",
+            "/v0/displays/create",
+            body={"display": {"content": content, "kind": "markdown"}},
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["id"]
+        if "display" in resp:
+            # Older versions of the CLI incorrectly returned a "display" object.
+            return resp["display"]["id"]
+        return resp["id"]
 
     def create_json_display(
         self,
@@ -181,14 +194,18 @@ class APIClient:
 
         Raises:
             HTTPError: If the display could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.post(
-            f"{self._api_host}/v0/displays/create",
-            json={"display": {"value": payload, "kind": "json"}},
-            headers=self._headers,
+        resp = self.__request(
+            "POST",
+            "/v0/displays/create",
+            body={"display": {"value": payload, "kind": "json"}},
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["id"]
+        if "display" in resp:
+            # Older versions of the CLI incorrectly returned a "display" object.
+            return resp["display"]["id"]
+        return resp["id"]
 
     def create_table_display(
         self,
@@ -206,14 +223,18 @@ class APIClient:
 
         Raises:
             HTTPError: If the display could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.post(
-            f"{self._api_host}/v0/displays/create",
-            json={"display": {"columns": columns, "rows": rows, "kind": "table"}},
-            headers=self._headers,
+        resp = self.__request(
+            "POST",
+            "/v0/displays/create",
+            body={"display": {"columns": columns, "rows": rows, "kind": "table"}},
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["id"]
+        if "display" in resp:
+            # Older versions of the CLI incorrectly returned a "display" object.
+            return resp["display"]["id"]
+        return resp["id"]
 
     def create_prompt(
         self,
@@ -234,10 +255,13 @@ class APIClient:
 
         Raises:
             HTTPError: If the prompt cannot be created properly.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.post(
-            f"{self._api_host}/v0/prompts/create",
-            json={
+        resp = self.__request(
+            "POST",
+            "/v0/prompts/create",
+            body={
                 "schema": {
                     "parameters": [dataclasses.asdict(p) for p in parameters],
                 },
@@ -252,10 +276,8 @@ class APIClient:
                 "cancelText": cancel_text,
                 "description": description,
             },
-            headers=self._headers,
         )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["id"]
+        return resp["id"]
 
     def get_prompt(self, prompt_id: str) -> Dict[str, Any]:
         """Fetches an Airplane prompt.
@@ -268,19 +290,128 @@ class APIClient:
 
         Raises:
             HTTPError: If the prompt cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
         """
-        resp = requests.get(
-            f"{self._api_host}/v0/prompts/get",
-            params={"id": prompt_id},
-            headers=self._headers,
-        )
-        self.__maybe_error_on_response(resp)
-        return resp.json()["prompt"]
+        resp = self.__request("GET", "/v0/prompts/get", params={"id": prompt_id})
+        return resp["prompt"]
 
-    @classmethod
-    def __maybe_error_on_response(cls, resp: Response) -> None:
-        if resp.status_code >= 400:
-            raise HTTPError(resp.json()["error"])
+    def __request(
+        self,
+        method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"],
+        path: str,
+        params: Optional[Dict[str, Any]] = None,
+        body: Optional[JSONType] = None,
+    ) -> Any:
+        """Issues an Airplane API request.
+
+        Args:
+            method: The HTTP method to perform in uppercase.
+            path: The API path to request (usually starting with `/v0/`).
+            params: Optional query parameters to attach to the URL.
+            body: Optional JSON body to send in the request.
+
+        Returns:
+            The deserialized JSON contents of the API response.
+
+        Raises:
+            HTTPError: If an occurs while issuing the API request.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        user_agent = f"airplane/sdk/python/{self._version} team/{self._opts.team_id}"
+        if self._opts.run_id:
+            user_agent += " run/" + self._opts.run_id
+
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": user_agent,
+            "X-Airplane-Client-Kind": "sdk/python",
+            "X-Airplane-Client-Version": self._version,
+            "X-Airplane-Token": self._opts.api_token,
+            "X-Airplane-Env-ID": self._opts.env_id,
+            "X-Team-ID": self._opts.team_id,
+            "Idempotency-Key": str(uuid.uuid4()),
+        }
+        if method != "GET" and body is not None:
+            headers["Content-Type"] = "application/json"
+        if self._opts.tunnel_token:
+            headers["X-Airplane-Dev-Token"] = self._opts.tunnel_token
+        if self._opts.sandbox_token:
+            headers["X-Airplane-Sandbox-Token"] = self._opts.sandbox_token
+
+        retries = 0
+        # Perform up to 10 total attempts.
+        max_retries = 9
+        retry_after_seconds = 0
+        while True:
+            try:
+                duration_seconds = _compute_retry_delay(retries)
+                if retry_after_seconds > 0:
+                    duration_seconds = retry_after_seconds
+                    retry_after_seconds = 0
+                if duration_seconds > 0:
+                    sleep(duration_seconds)
+
+                resp = requests.request(
+                    method,
+                    url=self._opts.api_host + path,
+                    params=params,
+                    json=body,
+                    headers=headers,
+                    timeout=self._opts.timeout_seconds,
+                )
+                status = resp.status_code
+
+                # If we got a 2xx status code, we can return successfully.
+                if 200 <= status < 300:
+                    return resp.json() if _is_json_response(resp) else resp.text
+
+                airplane_retryable = resp.headers.get("x-airplane-retryable")
+                can_retry_status = status == 429 or (status >= 500 and status != 501)
+                can_retry = (
+                    airplane_retryable != "false"
+                    and retries < max_retries
+                    and (can_retry_status or airplane_retryable == "true")
+                )
+                if not can_retry:
+                    raise _http_error_from_resp(resp)
+
+                retry_after_seconds = _parse_retry_after(resp)
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                if retries == max_retries:
+                    raise
+            finally:
+                retries += 1
+
+
+def _is_json_response(resp: Response) -> bool:
+    return "application/json" in resp.headers.get("content-type", "")
+
+
+def _parse_retry_after(resp: Response) -> int:
+    header = resp.headers.get("retry-after", 0)
+    try:
+        return int(header)
+    except ValueError:
+        return 0
+
+
+def _compute_retry_delay(retries: int) -> float:
+    if retries <= 1:
+        return 0
+    base_sec = 0.1
+    cap_sec = 30
+    return random() * min(cap_sec, base_sec * 2 ** (retries - 1))
+
+
+def _http_error_from_resp(resp: Response) -> HTTPError:
+    msg = f"Request failed: {resp.status_code}"
+    if _is_json_response(resp):
+        body = resp.json()
+        if "error" in body:
+            msg = body["error"]
+    return HTTPError(msg, response=resp)
 
 
 def client_opts_from_env() -> ClientOpts:
@@ -297,8 +428,12 @@ def client_opts_from_env() -> ClientOpts:
         api_host=os.getenv("AIRPLANE_API_HOST", ""),
         api_token=os.getenv("AIRPLANE_TOKEN", ""),
         env_id=os.getenv("AIRPLANE_ENV_ID", ""),
+        team_id=os.getenv("AIRPLANE_TEAM_ID", ""),
+        run_id=os.getenv("AIRPLANE_RUN_ID", ""),
+        tunnel_token=os.getenv("AIRPLANE_TUNNEL_TOKEN", ""),
+        sandbox_token=os.getenv("AIRPLANE_SANDBOX_TOKEN", ""),
     )
-    if any(not x for x in [opts.api_host, opts.api_token, opts.env_id]):
+    if any(not x for x in [opts.api_host, opts.api_token, opts.env_id, opts.team_id]):
         raise InvalidEnvironmentException()
     return opts
 
