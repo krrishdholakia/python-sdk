@@ -31,7 +31,7 @@ from airplane.params import (
     to_airplane_type,
 )
 from airplane.runtime import execute
-from airplane.types import ConfigVar, File, FuncT, RuntimeType
+from airplane.types import ConfigVar, File, RuntimeType
 from airplane.utils import make_slug
 
 
@@ -312,7 +312,7 @@ class TaskDef:
     @classmethod
     def build(
         cls,
-        func: FuncT,
+        func: Callable[P, Any],
         runtime: RuntimeType,
         slug: Optional[str],
         name: Optional[str],
