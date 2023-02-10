@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import inflection
 import typing_extensions
 from docstring_parser import parse
+from typing_extensions import ParamSpec
 
 from airplane.api.entities import Run
 from airplane.exceptions import (
@@ -116,6 +117,9 @@ class Schedule:
     param_values: Optional[Dict[str, Optional[ParamTypes]]] = None
 
 
+P = ParamSpec("P")
+
+
 def task(
     slug: Optional[str] = None,
     name: Optional[str] = None,
@@ -127,7 +131,7 @@ def task(
     resources: Optional[List[Resource]] = None,
     schedules: Optional[List[Schedule]] = None,
     env_vars: Optional[List[EnvVar]] = None,
-) -> Callable[[FuncT], Callable[..., Run]]:
+) -> Callable[[Callable[P, Any]], Callable[P, Run]]:
     """Decorator used to define an Airplane task.
 
     This decorator inspects the decorated function to create an Airplane task. The task's parameters
@@ -195,7 +199,7 @@ def task(
             to configure constant values or reference config variables.
     """
 
-    def decorator(func: FuncT) -> Callable[..., Run]:
+    def decorator(func: Callable[P, Any]) -> Callable[P, Run]:
         """Assigns an __airplane attribute to a function to mark it as an Airplane object"""
 
         config = TaskDef.build(
@@ -214,8 +218,8 @@ def task(
         )
 
         @functools.wraps(func)
-        def wrapped(*args: Any, **kwargs: Any) -> Run:
-            kwargs.update(zip(func.__code__.co_varnames, args))
+        def wrapped(*args: P.args, **kwargs: P.kwargs) -> Run:
+            kwargs.update(zip(func.__code__.co_varnames, args))  # type: ignore
             return execute(config.slug, kwargs)
 
         # pylint: disable=protected-access
