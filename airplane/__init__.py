@@ -1,6 +1,6 @@
 """airplane - An SDK for writing Airplane tasks in Python"""
 
-from airplane import display
+from airplane import display, task
 from airplane._version import __version__
 from airplane.api.client import APIClient
 from airplane.api.entities import PromptReviewers, Run, RunStatus
@@ -12,3 +12,15 @@ from airplane.params import LabeledOption, ParamConfig
 from airplane.runtime import execute, prompt
 from airplane.runtime.standard import run  # Deprecated
 from airplane.types import SQL, ConfigVar, File, LongText
+
+# pylint:disable=missing-docstring
+
+
+@task()
+def my_task(param: str) -> str:
+    return param
+
+
+@task()
+def my_other_task() -> None:
+    my_task(invalid_kwarg="foo")

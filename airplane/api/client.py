@@ -207,6 +207,60 @@ class APIClient:
             return resp["display"]["id"]
         return resp["id"]
 
+    def get_task_reviewers(
+        self,
+        slug: str,
+    ) -> str:
+        """Fetches the reviewers for a task.
+
+        Args:
+            slug: The slug of the task for which to fetch reviewers.
+
+        Returns:
+
+
+        Raises:
+            HTTPError: If the display could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "POST",
+            "/v0/displays/create",
+            body={"display": {"value": payload, "kind": "json"}},
+        )
+        if "display" in resp:
+            # Older versions of the CLI incorrectly returned a "display" object.
+            return resp["display"]["id"]
+        return resp["id"]
+
+    def create_json_display(
+        self,
+        payload: JSONType,
+    ) -> str:
+        """Creates a json display.
+
+        Args:
+            payload: Payload to display
+
+        Returns:
+            The Airplane display's id.
+
+        Raises:
+            HTTPError: If the display could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "POST",
+            "/v0/displays/create",
+            body={"display": {"value": payload, "kind": "json"}},
+        )
+        if "display" in resp:
+            # Older versions of the CLI incorrectly returned a "display" object.
+            return resp["display"]["id"]
+        return resp["id"]
+
     def create_table_display(
         self,
         columns: Optional[List[Dict[str, Optional[str]]]],
@@ -268,7 +322,7 @@ class APIClient:
                 "reviewers": {
                     "users": reviewers.users,
                     "groups": reviewers.groups,
-                    "allowSelfApproval": reviewers.allow_self_approvals,
+                    "allowSelfApprovals": reviewers.allow_self_approvals,
                 }
                 if reviewers
                 else None,

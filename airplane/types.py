@@ -1,5 +1,15 @@
 import dataclasses
-from typing import TYPE_CHECKING, Any, Callable, List, Mapping, NewType, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    List,
+    Mapping,
+    NewType,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import Literal
 
@@ -54,4 +64,20 @@ class ConfigVar:
     """
 
     name: str
+    value: str
+
+
+@dataclasses.dataclass(frozen=True)
+class Task:
+    """Airplane task."""
+
+    name: str
+    value: str
+
+
+@dataclasses.dataclass(frozen=True)
+class TaskReviewers:
+    """Airplane task reviewers."""
+
+    task: Optional[Task]
     value: str
