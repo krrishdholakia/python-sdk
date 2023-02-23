@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union, overload
 import inflection
 from typing_extensions import Literal
 
-from airplane.api.entities import Run
+from airplane.api.entities import PromptReviewers, Run
 from airplane.params import (
     SERIALIZED_DATE_FORMAT,
     SERIALIZED_DATETIME_FORMAT,
@@ -137,7 +137,7 @@ class Prompt:
 def prompt(
     params: Optional[Dict[str, Any]] = None,
     *,
-    reviewers: Any = None,
+    reviewers: Optional[PromptReviewers] = None,
     confirm_text: Optional[str] = None,
     cancel_text: Optional[str] = None,
     description: Optional[str] = None,
@@ -150,7 +150,7 @@ def prompt(
 def prompt(
     params: Optional[Dict[str, Any]] = None,
     *,
-    reviewers: Any = None,
+    reviewers: Optional[PromptReviewers] = None,
     confirm_text: Optional[str] = None,
     cancel_text: Optional[str] = None,
     description: Optional[str] = None,
@@ -162,7 +162,7 @@ def prompt(
 def prompt(
     params: Optional[Dict[str, Any]] = None,
     *,
-    reviewers: Any = None,
+    reviewers: Optional[PromptReviewers] = None,
     confirm_text: Optional[str] = None,
     cancel_text: Optional[str] = None,
     description: Optional[str] = None,

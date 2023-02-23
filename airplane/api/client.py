@@ -268,7 +268,7 @@ class APIClient:
                 "reviewers": {
                     "users": reviewers.users,
                     "groups": reviewers.groups,
-                    "allowSelfApproval": reviewers.allow_self_approvals,
+                    "allowSelfApprovals": reviewers.allow_self_approvals,
                 }
                 if reviewers
                 else None,
