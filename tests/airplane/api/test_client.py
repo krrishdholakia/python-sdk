@@ -8,11 +8,10 @@ from unittest import mock
 import pytest
 import requests
 import responses
-from requests import HTTPError, PreparedRequest, Response
+from requests import PreparedRequest, Response
 from requests.structures import CaseInsensitiveDict
 from responses.matchers import json_params_matcher
 
-from airplane import InvalidEnvironmentException
 from airplane.api.client import (
     APIClient,
     ClientOpts,
@@ -21,6 +20,7 @@ from airplane.api.client import (
     api_client_from_env,
     client_opts_from_env,
 )
+from airplane.exceptions import HTTPError, InvalidEnvironmentException
 
 client = APIClient(
     ClientOpts(

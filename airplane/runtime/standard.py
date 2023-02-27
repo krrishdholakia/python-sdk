@@ -6,9 +6,13 @@ import requests
 
 from airplane._version import __version__
 from airplane.api.client import api_client_from_env
-from airplane.api.entities import PromptReviewers, Run, RunStatus
+from airplane.api.entities import PromptReviewers, Run, RunStatus, TaskReviewer
 from airplane.exceptions import (
+    TASK_MUST_BE_REQUESTED_ERROR_CODE,
+    HTTPError,
     PromptPendingException,
+    RequestPendingException,
+    RequestRejectedException,
     RunPendingException,
     RunTerminationException,
 )
@@ -33,10 +37,53 @@ def execute(
     Raises:
         HTTPError: If the task cannot be executed properly.
         RunTerminationException: If the run fails or is cancelled.
+        ValueError: If the task is missing a form trigger.
+        RequestRejectedException: If the request for the task is rejected.
     """
 
     client = api_client_from_env()
-    run_id = client.execute_task(slug, param_values, resources)
+    try:
+        run_id = client.execute_task(slug, param_values, resources)
+    except HTTPError as err:
+        if err.error_code != TASK_MUST_BE_REQUESTED_ERROR_CODE:
+            raise
+        task_reviewers_info = client.get_task_reviewers(slug)
+        form_trigger = None
+        if "task" in task_reviewers_info:
+            for trigger in task_reviewers_info["task"].get("triggers", []):
+                if trigger["kind"] == "form":
+                    form_trigger = trigger
+
+        if form_trigger is None:
+            # pylint: disable=raise-missing-from
+            raise ValueError("Missing form trigger for task, unable to create request")
+
+        reviewers = task_reviewers_info.get("reviewers")
+        if reviewers:
+            reviewers = [
+                TaskReviewer(user_id=r.get("userID"), group_id=r.get("groupID"))
+                for r in reviewers
+            ]
+        trigger_request_id = client.create_task_request(
+            trigger_id=form_trigger["triggerID"],
+            param_values=param_values,
+            reason="Automatically generated from parent run.",
+            reviewers=reviewers,
+        )
+
+        trigger_request_info = __wait_for_request_completion(trigger_request_id)
+        if trigger_request_info["status"] == "rejected":
+            # pylint: disable=raise-missing-from
+            raise RequestRejectedException(f"Request for task {slug} was rejected")
+
+        run_id = ""
+        if "triggerReceipt" in trigger_request_info:
+            run_id = trigger_request_info["triggerReceipt"].get("taskRunID", "")
+
+        if not run_id:
+            # pylint: disable=raise-missing-from
+            raise ValueError("Unable to find run ID for completed request")
+
     run_info = __wait_for_run_completion(run_id)
     outputs = client.get_run_output(run_id)
     # pylint: disable=redefined-outer-name
@@ -100,6 +147,22 @@ def __wait_for_run_completion(run_id: str) -> Dict[str, Any]:
     if run_info["status"] in ("NotStarted", "Queued", "Active"):
         raise RunPendingException()
     return run_info
+
+
+@backoff.on_exception(
+    lambda: backoff.expo(factor=0.1, max_value=5),
+    (
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+        RequestPendingException,
+    ),
+)
+def __wait_for_request_completion(trigger_request_id: str) -> Dict[str, Any]:
+    client = api_client_from_env()
+    trigger_request_info = client.get_trigger_request(trigger_request_id)
+    if trigger_request_info["status"] == "pending":
+        raise RequestPendingException()
+    return trigger_request_info
 
 
 def prompt_background(

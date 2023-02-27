@@ -9,12 +9,11 @@ from typing import Any, Dict, List, Optional
 
 import requests
 from requests import Response
-from requests.models import HTTPError
 from typing_extensions import Literal
 
 from airplane._version import __version__
-from airplane.api.entities import PromptReviewers
-from airplane.exceptions import InvalidEnvironmentException
+from airplane.api.entities import PromptReviewers, TaskReviewer
+from airplane.exceptions import HTTPError, InvalidEnvironmentException
 from airplane.params import ParamTypes, SerializedParam, serialize_param
 from airplane.types import JSONType
 
@@ -296,6 +295,96 @@ class APIClient:
         resp = self.__request("GET", "/v0/prompts/get", params={"id": prompt_id})
         return resp["prompt"]
 
+    def get_task_reviewers(self, slug: str) -> Dict[str, Any]:
+        """Fetches reviewers for an Airplane task.
+
+        Args:
+            slug: The slug of the task to fetch reviewers for.
+
+        Returns:
+            The Airplane task's reviewers.
+
+        Raises:
+            HTTPError: If the task reviewers cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "GET", "/v0/tasks/getTaskReviewers", params={"taskSlug": slug}
+        )
+        return resp
+
+    def get_trigger_request(self, trigger_request_id: str) -> Dict[str, Any]:
+        """Fetches an Airplane trigger request.
+
+        Args:
+            trigger_request_id: The id of the trigger request to fetch.
+
+        Returns:
+            The Airplane trigger request's attributes.
+
+        Raises:
+            HTTPError: If the trigger request cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "GET",
+            "/v0/requests/get",
+            params={"triggerRequestID": trigger_request_id},
+        )
+        return resp
+
+    def create_task_request(
+        self,
+        trigger_id: str,
+        param_values: Optional[Dict[str, ParamTypes]] = None,
+        reason: Optional[str] = None,
+        reviewers: Optional[List[TaskReviewer]] = None,
+    ) -> str:
+        """Requests an Airplane task.
+
+        Args:
+            trigger_id: The id of the trigger to execute.
+            param_values: Optional map of parameter slugs to values.
+            reason: Optional reason for the request.
+            reviewers: Optional list of reviewers to request.
+
+        Returns:
+            The id of the trigger request.
+
+        Raises:
+            HTTPError: If the task cannot be requested.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        serialized_params = {}
+        for key, val in (param_values or {}).items():
+            serialized_params[key] = serialize_param(val)
+        resp = self.__request(
+            "POST",
+            "/v0/requests/create",
+            body={
+                "triggerID": trigger_id,
+                "reason": reason,
+                "reviewers": [
+                    {
+                        "userID": r.user_id,
+                        "groupID": r.group_id,
+                    }
+                    for r in reviewers
+                ]
+                if reviewers
+                else None,
+                "requestData": {
+                    "taskData": {
+                        "paramValues": serialized_params,
+                    },
+                },
+            },
+        )
+        return resp["triggerRequestID"]
+
     def __request(
         self,
         method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"],
@@ -407,11 +496,13 @@ def _compute_retry_delay(retries: int) -> float:
 
 def _http_error_from_resp(resp: Response) -> HTTPError:
     msg = f"Request failed: {resp.status_code}"
+    error_code = None
     if _is_json_response(resp):
         body = resp.json()
         if "error" in body:
             msg = body["error"]
-    return HTTPError(msg, response=resp)
+        error_code = body.get("code")
+    return HTTPError(message=msg, status_code=resp.status_code, error_code=error_code)
 
 
 def client_opts_from_env() -> ClientOpts:

@@ -83,3 +83,16 @@ class PromptReviewers:
     groups: Optional[List[str]] = None
     users: Optional[List[str]] = None
     allow_self_approvals: bool = True
+
+
+@dataclass
+class TaskReviewer:
+    """Reviewers that are allowed to approve the task.
+
+    Args:
+        group_id: The ID of the group allowed to approve the task.o
+        user_id: The ID of the user allowed to approve the task.
+    """
+
+    group_id: Optional[str] = None
+    user_id: Optional[str] = None

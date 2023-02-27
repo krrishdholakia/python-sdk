@@ -6,9 +6,27 @@ from typing import Optional
 
 from airplane.api.entities import Run
 
+TASK_MUST_BE_REQUESTED_ERROR_CODE = "task_must_be_requested"
+
+
+@dataclass
+class HTTPError(Exception):
+    """Exception that indicates an HTTP error occurred."""
+
+    status_code: int
+    message: str
+    error_code: Optional[str] = None
+
+    def __str__(self) -> str:
+        return f"Request failed {self.status_code}: {self.message}"
+
 
 class RunPendingException(Exception):
     """Exception that indicates a run is still in pending state."""
+
+
+class RequestPendingException(Exception):
+    """Exception that indicates a request is still in pending state."""
 
 
 class PromptPendingException(Exception):
@@ -44,6 +62,10 @@ class RunTerminationException(Exception):
         ):
             return self.run.output["error"]
         return f"Run {str(self.run.status.value).lower()}"
+
+
+class RequestRejectedException(Exception):
+    """Exception that indicates a request was rejected."""
 
 
 @dataclass
