@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import inflection
 import typing_extensions
 from docstring_parser import parse
-from typing_extensions import ParamSpec
+from typing_extensions import Literal, ParamSpec
 
 from airplane.api.entities import Run
 from airplane.exceptions import (
@@ -33,6 +33,9 @@ from airplane.params import (
 from airplane.runtime import execute
 from airplane.types import ConfigVar, File, RuntimeType
 from airplane.utils import make_slug
+
+# Restrict task execution so it can only be called from other tasks or views.
+TaskCaller = Literal["task", "view"]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -126,6 +129,7 @@ def task(
     description: Optional[str] = None,
     require_requests: bool = False,
     allow_self_approvals: bool = True,
+    restrict_callers: Optional[List[TaskCaller]] = None,
     timeout: int = 3600,
     constraints: Optional[Dict[str, str]] = None,
     resources: Optional[List[Resource]] = None,
@@ -182,6 +186,9 @@ def task(
             Whether or not this task requires a request to execute.
         allow_self_approvals:
             Whether or not this task allows self approvals.
+        restrict_callers:
+            Restrict task execution to specific callers. This disables direct execution
+            and hides the task in the UI.
         timeout:
             How long a task can run (in seconds) for before it is automatically cancelled.
         constraints:
@@ -210,6 +217,7 @@ def task(
             description=description,
             require_requests=require_requests,
             allow_self_approvals=allow_self_approvals,
+            restrict_callers=restrict_callers,
             timeout=timeout,
             constraints=constraints,
             resources=resources,
@@ -266,6 +274,7 @@ class TaskDef:
     description: Optional[str]
     require_requests: Optional[bool]
     allow_self_approvals: Optional[bool]
+    restrict_callers: Optional[List[TaskCaller]]
     timeout: Optional[int]
     constraints: Optional[Dict[str, str]]
     resources: Optional[List[Resource]]
@@ -319,6 +328,7 @@ class TaskDef:
         description: Optional[str],
         require_requests: bool,
         allow_self_approvals: bool,
+        restrict_callers: Optional[List[TaskCaller]],
         timeout: int,
         constraints: Optional[Dict[str, str]],
         resources: Optional[List[Resource]],
@@ -417,6 +427,7 @@ class TaskDef:
             description=task_description,
             require_requests=require_requests,
             allow_self_approvals=allow_self_approvals,
+            restrict_callers=restrict_callers,
             timeout=timeout,
             constraints=constraints,
             schedules=schedules,
