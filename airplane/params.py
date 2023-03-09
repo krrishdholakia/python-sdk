@@ -1,6 +1,6 @@
 import dataclasses
 import datetime
-from typing import Any, Generic, List, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Generic, List, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Annotated, Literal, get_args, get_origin
 
@@ -30,9 +30,7 @@ ParamTypes = Union[
     LongText,
     SQL,
     bool,
-    # File is not included since we don't allow users to provide default File values
-    # via inline configuration yet.
-    # File,
+    File,
     int,
     float,
     datetime.date,
@@ -40,6 +38,20 @@ ParamTypes = Union[
     ConfigVar,
 ]
 
+PromptParamTypes = Union[
+    Type[str],
+    Type[LongText],
+    Type[SQL],
+    Type[bool],
+    Type[File],
+    Type[int],
+    Type[float],
+    Type[datetime.date],
+    Type[datetime.datetime],
+    Type[ConfigVar],
+    # To support Annotated types
+    object,
+]
 
 SerializedParamType = Union[
     Literal["string"],
@@ -272,6 +284,8 @@ def serialize_param(
         return val.strftime(SERIALIZED_DATE_FORMAT)
     if isinstance(val, ConfigVar):
         return val.name
+    if isinstance(val, File):
+        return val.id
     return val
 
 

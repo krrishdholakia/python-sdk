@@ -14,6 +14,7 @@ from airplane.params import (
     SERIALIZED_DATETIME_MILLISECONDS_FORMAT,
     Constraints,
     ParamConfig,
+    PromptParamTypes,
     SerializedParam,
     make_options,
     resolve_type,
@@ -135,7 +136,7 @@ class Prompt:
 
 @overload
 def prompt(
-    params: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, PromptParamTypes]] = None,
     *,
     reviewers: Optional[PromptReviewers] = None,
     confirm_text: Optional[str] = None,
@@ -148,7 +149,7 @@ def prompt(
 
 @overload
 def prompt(
-    params: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, PromptParamTypes]] = None,
     *,
     reviewers: Optional[PromptReviewers] = None,
     confirm_text: Optional[str] = None,
@@ -160,7 +161,7 @@ def prompt(
 
 
 def prompt(
-    params: Optional[Dict[str, Any]] = None,
+    params: Optional[Dict[str, PromptParamTypes]] = None,
     *,
     reviewers: Optional[PromptReviewers] = None,
     confirm_text: Optional[str] = None,

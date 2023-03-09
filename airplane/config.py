@@ -369,11 +369,11 @@ class TaskDef:
             if param.default is inspect.Signature.empty:
                 default = None
             else:
-                default = serialize_param(param.default)
-                if isinstance(default, File):
+                if isinstance(param.default, File):
                     raise UnsupportedDefaultTypeException(
                         "File defaults are not currently supported with inline code configuration."
                     )
+                default = serialize_param(param.default)
             if param_config.default is not None and param_config.default != default:
                 raise InvalidTaskConfigurationException(
                     f"Function {func.__name__} contains an invalid default value configuration "

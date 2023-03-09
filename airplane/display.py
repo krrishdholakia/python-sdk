@@ -6,7 +6,7 @@ import deprecation
 
 from airplane._version import __version__
 from airplane.api.client import api_client_from_env
-from airplane.types import JSONType
+from airplane.types import File, JSONType
 
 
 def text(content: str, dedent: bool = True) -> None:
@@ -48,9 +48,7 @@ def markdown(content: str, dedent: bool = True) -> None:
     text(content, dedent)
 
 
-def json(
-    payload: JSONType,
-) -> None:
+def json(payload: JSONType) -> None:
     """Appends a display to the run that renders a JSON payload.
 
     Args:
@@ -60,6 +58,21 @@ def json(
         HTTPError: If the display could not be created.
     """
     api_client_from_env().create_json_display(payload)
+
+
+def file(
+    # pylint: disable=redefined-outer-name
+    file: File,
+) -> None:
+    """Appends a display to the run that renders a File payload.
+
+    Args:
+        file: File payload to render
+
+    Raises:
+        HTTPError: If the display could not be created.
+    """
+    api_client_from_env().create_file_display(file)
 
 
 @dataclass(frozen=True)

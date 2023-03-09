@@ -15,7 +15,7 @@ from airplane._version import __version__
 from airplane.api.entities import PromptReviewers, TaskReviewer
 from airplane.exceptions import HTTPError, InvalidEnvironmentException
 from airplane.params import ParamTypes, SerializedParam, serialize_param
-from airplane.types import JSONType
+from airplane.types import File, JSONType
 
 
 @dataclass(frozen=True)
@@ -205,6 +205,55 @@ class APIClient:
             # Older versions of the CLI incorrectly returned a "display" object.
             return resp["display"]["id"]
         return resp["id"]
+
+    def create_file_display(
+        self,
+        file: File,  # pylint: disable=redefined-outer-name
+    ) -> str:
+        """Creates a file display.
+
+        Args:
+            file: File to display
+
+        Returns:
+            The Airplane display's id.
+
+        Raises:
+            HTTPError: If the display could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "POST",
+            "/v0/displays/create",
+            body={"display": {"uploadID": file.id, "kind": "file"}},
+        )
+        if "display" in resp:
+            # Older versions of the CLI incorrectly returned a "display" object.
+            return resp["display"]["id"]
+        return resp["id"]
+
+    def create_upload(self, file_name: str, num_bytes: int) -> Dict[str, Any]:
+        """Creates an upload.
+
+        Args:
+            file_name: Name of the file to create.
+            num_bytes: Number of bytes in the upload.
+
+        Returns:
+            The Airplane upload's attributes.
+
+        Raises:
+            HTTPError: If the upload could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "POST",
+            "/v0/uploads/create",
+            body={"fileName": file_name, "sizeBytes": num_bytes},
+        )
+        return resp
 
     def create_table_display(
         self,
