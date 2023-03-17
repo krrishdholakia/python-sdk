@@ -156,20 +156,22 @@ class APIClient:
         """
         if use_zone:
             zone_info = self.get_run_zone(run_id)
-            if (zone_info is None
-                or 'accessToken' not in zone_info
-                or 'dataPlaneURL' not in zone_info):
+            if (
+                zone_info is None
+                or "accessToken" not in zone_info
+                or "dataPlaneURL" not in zone_info
+            ):
                 raise InvalidZoneException(
-                    f'Missing required fields in zone info response: {str(zone_info)}',
+                    f"Missing required fields in zone info response: {str(zone_info)}",
                 )
             resp = self.__request(
                 "GET",
                 "/v0/dp/runs/getOutputs",
                 params={"runID": run_id},
                 extra_headers={
-                    'X-Airplane-Dataplane-Token': zone_info['accessToken'],
+                    "X-Airplane-Dataplane-Token": zone_info["accessToken"],
                 },
-                host_override=zone_info['dataPlaneURL'],
+                host_override=zone_info["dataPlaneURL"],
             )
         else:
             resp = self.__request(

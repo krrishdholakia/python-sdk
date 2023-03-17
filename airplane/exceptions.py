@@ -96,5 +96,6 @@ class UnsupportedDefaultTypeException(Exception):
 class InvalidTaskConfigurationException(Exception):
     """Exception that indicates an inline task configuration is invalid."""
 
+
 class InvalidZoneException(Exception):
     """Exception indicating that a run storage zone info is invalid."""
