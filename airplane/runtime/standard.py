@@ -86,7 +86,11 @@ def execute(
 
     run_info = __wait_for_run_completion(run_id)
     use_zone = run_info.get("zoneID", None) is not None
-    outputs = client.get_run_output(run_id, use_zone=use_zone)
+    if use_zone:
+        outputs = client.get_run_output_from_zone(run_id)
+    else:
+        outputs = client.get_run_output(run_id)
+
     # pylint: disable=redefined-outer-name
     run = Run(
         id=run_info["id"],
@@ -131,7 +135,11 @@ def run(
     run_id = client.create_run(task_id, parameters, env, constraints)
     run_info = __wait_for_run_completion(run_id)
     use_zone = run_info.get("zoneID", None) is not None
-    outputs = client.get_run_output(run_id, use_zone=use_zone)
+    if use_zone:
+        outputs = client.get_run_output_from_zone(run_id)
+    else:
+        outputs = client.get_run_output(run_id)
+
     return {"status": run_info["status"], "outputs": outputs}
 
 

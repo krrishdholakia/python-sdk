@@ -138,12 +138,33 @@ class APIClient:
         )
         return resp
 
-    def get_run_output(self, run_id: str, use_zone: bool = False) -> Any:
-        """Fetches an Airplane's run output.
+    def get_run_output(self, run_id: str) -> Any:
+        """Fetches an Airplane run's output from the Airplane API.
 
         Args:
             run_id: The id of the run for which to fetch output.
-            use_zone: Whether to fetch outputs from the run's storage zone.
+
+        Returns:
+            The Airplane run's outputs.
+
+        Raises:
+            HTTPError: If the run outputs cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "GET",
+            "/v0/runs/getOutputs",
+            params={"id": run_id},
+        )
+
+        return resp["output"]
+
+    def get_run_output_from_zone(self, run_id: str) -> Any:
+        """Fetches an Airplane run's output from a self-hosted storage zone.
+
+        Args:
+            run_id: The id of the run for which to fetch output.
 
         Returns:
             The Airplane run's outputs.
@@ -154,32 +175,24 @@ class APIClient:
             requests.exceptions.Timeout: If the request times out.
             requests.exceptions.ConnectionError: If a network error occurs.
         """
-        if use_zone:
-            zone_info = self.get_run_zone(run_id)
-            if (
-                zone_info is None
-                or "accessToken" not in zone_info
-                or "dataPlaneURL" not in zone_info
-            ):
-                raise InvalidZoneException(
-                    f"Missing required fields in zone info response: {zone_info}",
-                )
-            resp = self.__request(
-                "GET",
-                "/v0/dp/runs/getOutputs",
-                params={"runID": run_id},
-                extra_headers={
-                    "X-Airplane-Dataplane-Token": zone_info["accessToken"],
-                },
-                host=zone_info["dataPlaneURL"],
+        zone_info = self.get_run_zone(run_id)
+        if (
+            zone_info is None
+            or "accessToken" not in zone_info
+            or "dataPlaneURL" not in zone_info
+        ):
+            raise InvalidZoneException(
+                f"Missing required fields in zone info response: {zone_info}",
             )
-        else:
-            resp = self.__request(
-                "GET",
-                "/v0/runs/getOutputs",
-                params={"id": run_id},
-            )
-
+        resp = self.__request(
+            "GET",
+            "/v0/dp/runs/getOutputs",
+            params={"runID": run_id},
+            extra_headers={
+                "X-Airplane-Dataplane-Token": zone_info["accessToken"],
+            },
+            host=zone_info["dataPlaneURL"],
+        )
         return resp["output"]
 
     def get_run_zone(self, run_id: str) -> Any:
