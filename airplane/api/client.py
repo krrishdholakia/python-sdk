@@ -138,7 +138,7 @@ class APIClient:
         )
         return resp
 
-    def get_run_output(self, run_id: str, use_zone: Optional[bool] = False) -> Any:
+    def get_run_output(self, run_id: str, use_zone: bool = False) -> Any:
         """Fetches an Airplane's run output.
 
         Args:
@@ -162,7 +162,7 @@ class APIClient:
                 or "dataPlaneURL" not in zone_info
             ):
                 raise InvalidZoneException(
-                    f"Missing required fields in zone info response: {str(zone_info)}",
+                    f"Missing required fields in zone info response: {zone_info}",
                 )
             resp = self.__request(
                 "GET",
@@ -171,7 +171,7 @@ class APIClient:
                 extra_headers={
                     "X-Airplane-Dataplane-Token": zone_info["accessToken"],
                 },
-                host_override=zone_info["dataPlaneURL"],
+                host=zone_info["dataPlaneURL"],
             )
         else:
             resp = self.__request(
@@ -489,7 +489,7 @@ class APIClient:
         params: Optional[Dict[str, Any]] = None,
         body: Optional[JSONType] = None,
         extra_headers: Optional[Dict[str, str]] = None,
-        host_override: Optional[str] = None,
+        host: Optional[str] = None,
     ) -> Any:
         """Issues an Airplane API request.
 
@@ -498,6 +498,8 @@ class APIClient:
             path: The API path to request (usually starting with `/v0/`).
             params: Optional query parameters to attach to the URL.
             body: Optional JSON body to send in the request.
+            extra_headers: Optional extra headers to add to the request.
+            host: Optional host. If unset, uses the configured Airplane API host.
 
         Returns:
             The deserialized JSON contents of the API response.
@@ -528,8 +530,8 @@ class APIClient:
         if self._opts.sandbox_token:
             headers["X-Airplane-Sandbox-Token"] = self._opts.sandbox_token
 
-        if extra_headers is not None:
-            for key, value in extra_headers.items():
+        if extra_headers:
+            for key, value in headers.items():
                 headers[key] = value
 
         retries = 0
@@ -537,8 +539,8 @@ class APIClient:
         max_retries = 9
         retry_after_seconds = 0
 
-        if host_override is not None:
-            url = host_override + path
+        if host:
+            url = host + path
         else:
             url = self._opts.api_host + path
 
