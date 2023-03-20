@@ -3,8 +3,8 @@ from typing import Optional, Union
 import filetype
 import requests
 
-from airplane.api.client import api_client_from_env
-from airplane.types import File
+from airplane_tests.api.client import api_client_from_env
+from airplane_tests.types import File
 
 
 def upload(payload: Union[bytes, str], file_name: Optional[str] = None) -> File:

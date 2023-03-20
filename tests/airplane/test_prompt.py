@@ -2,9 +2,9 @@ from unittest import mock
 
 from typing_extensions import Annotated
 
-from airplane import SQL, LabeledOption, ParamConfig, PromptReviewers, prompt
-from airplane._version import __version__
-from airplane.params import Constraints, SerializedParam
+from airplane_tests import SQL, LabeledOption, ParamConfig, PromptReviewers, prompt
+from airplane_tests._version import __version__
+from airplane_tests.params import Constraints, SerializedParam
 
 
 @mock.patch("airplane.runtime.standard.api_client_from_env")

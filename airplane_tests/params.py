@@ -4,8 +4,8 @@ from typing import Any, Generic, List, Optional, Sequence, Tuple, Type, TypeVar,
 
 from typing_extensions import Annotated, Literal, get_args, get_origin
 
-from airplane.exceptions import InvalidAnnotationException
-from airplane.types import SQL, ConfigVar, File, LongText
+from airplane_tests.exceptions import InvalidAnnotationException
+from airplane_tests.types import SQL, ConfigVar, File, LongText
 
 SERIALIZED_DATE_FORMAT = "%Y-%m-%d"
 SERIALIZED_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, Generic, List, Optional, TypeVar
 
-from airplane.types import JSONType
+from airplane_tests.types import JSONType
 
 
 class RunStatus(Enum):

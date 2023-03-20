@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from textwrap import dedent
 from typing import Optional
 
-from airplane.api.entities import Run
+from airplane_tests.api.entities import Run
 
 TASK_MUST_BE_REQUESTED_ERROR_CODE = "task_must_be_requested"
 

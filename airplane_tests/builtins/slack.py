@@ -1,8 +1,8 @@
 import textwrap
 from typing import cast
 
-from airplane.api.entities import BuiltInRun
-from airplane.runtime import __execute_internal
+from airplane_tests.api.entities import BuiltInRun
+from airplane_tests.runtime import __execute_internal
 
 
 def message(

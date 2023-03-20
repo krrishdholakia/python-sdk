@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 
-from airplane.builtins import __convert_resource_alias_to_id
-from airplane.exceptions import (
+from airplane_tests.builtins import __convert_resource_alias_to_id
+from airplane_tests.exceptions import (
     InvalidEnvironmentException,
     UnknownResourceAliasException,
 )

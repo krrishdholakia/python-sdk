@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional, Union, overload
 import inflection
 from typing_extensions import Literal
 
-from airplane.api.entities import PromptReviewers, Run
-from airplane.params import (
+from airplane_tests.api.entities import PromptReviewers, Run
+from airplane_tests.params import (
     SERIALIZED_DATE_FORMAT,
     SERIALIZED_DATETIME_FORMAT,
     SERIALIZED_DATETIME_MILLISECONDS_FORMAT,
@@ -21,12 +21,12 @@ from airplane.params import (
     serialize_param,
     to_serialized_airplane_type,
 )
-from airplane.runtime.standard import (
+from airplane_tests.runtime.standard import (
     execute as standard_execute,
     prompt_background as standard_prompt_background,
     wait_for_prompt as standard_wait_for_prompt,
 )
-from airplane.types import ConfigVar, File
+from airplane_tests.types import ConfigVar, File
 
 _AIRPLANE_RUNTIME_ENV_VAR = "AIRPLANE_RUNTIME"
 

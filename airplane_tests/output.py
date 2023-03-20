@@ -4,7 +4,7 @@ from typing import Any, Iterable, Union
 
 import deprecation
 
-from airplane._version import __version__
+from airplane_tests._version import __version__
 
 _CHUNK_SIZE = 8192
 

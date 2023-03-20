@@ -2,7 +2,7 @@ import json
 import os
 from typing import Any, Dict
 
-from airplane.exceptions import (
+from airplane_tests.exceptions import (
     InvalidEnvironmentException,
     UnknownResourceAliasException,
 )

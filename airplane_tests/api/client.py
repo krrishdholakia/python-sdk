@@ -11,15 +11,15 @@ import requests
 from requests import Response
 from typing_extensions import Literal
 
-from airplane._version import __version__
-from airplane.api.entities import PromptReviewers, TaskReviewer
-from airplane.exceptions import (
+from airplane_tests._version import __version__
+from airplane_tests.api.entities import PromptReviewers, TaskReviewer
+from airplane_tests.exceptions import (
     HTTPError,
     InvalidEnvironmentException,
     InvalidZoneException,
 )
-from airplane.params import ParamTypes, SerializedParam, serialize_param
-from airplane.types import File, JSONType
+from airplane_tests.params import ParamTypes, SerializedParam, serialize_param
+from airplane_tests.types import File, JSONType
 
 
 @dataclass(frozen=True)

@@ -4,9 +4,9 @@ from typing import List, Union, cast
 
 from typing_extensions import TypedDict
 
-from airplane.api.entities import BuiltInRun
-from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import __execute_internal
+from airplane_tests.api.entities import BuiltInRun
+from airplane_tests.builtins import __convert_resource_alias_to_id
+from airplane_tests.runtime import __execute_internal
 
 
 @dataclass

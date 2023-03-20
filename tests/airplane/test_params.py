@@ -3,14 +3,14 @@ from typing import Any, Optional, Tuple, Union
 import pytest
 from typing_extensions import Annotated
 
-from airplane.exceptions import InvalidAnnotationException
-from airplane.params import (
+from airplane_tests.exceptions import InvalidAnnotationException
+from airplane_tests.params import (
     ParamConfig,
     resolve_type,
     to_airplane_type,
     to_serialized_airplane_type,
 )
-from airplane.types import SQL
+from airplane_tests.types import SQL
 
 
 @pytest.mark.parametrize(

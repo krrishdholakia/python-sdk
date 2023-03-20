@@ -8,7 +8,7 @@ repository = "https://github.com/airplanedev/python-sdk"
 homepage = "https://airplane.dev"
 readme = "README.md"
 packages = [
-  { include = "airplane" },
+  { include = "airplane_test" },
 ]
 
 [tool.poetry.dependencies]

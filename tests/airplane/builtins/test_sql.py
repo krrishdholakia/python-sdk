@@ -2,7 +2,7 @@ import os
 from typing import Any
 from unittest import mock
 
-import airplane
+import airplane_tests
 
 
 @mock.patch.dict(
@@ -11,10 +11,10 @@ import airplane
 )
 @mock.patch(
     "airplane.sql.__execute_internal",
-    return_value=airplane.Run("baz", None, {}, airplane.RunStatus.SUCCEEDED, None),
+    return_value=airplane_tests.Run("baz", None, {}, airplane_tests.RunStatus.SUCCEEDED, None),
 )
 def test_query(mock_execute_internal: Any) -> None:
-    airplane.sql.query(
+    airplane_tests.sql.query(
         sql_resource="foo",
         query="SELECT * FROM foo",
     )
@@ -23,7 +23,7 @@ def test_query(mock_execute_internal: Any) -> None:
         {
             "query": "SELECT * FROM foo",
             "queryArgs": None,
-            "transactionMode": airplane.sql.TransactionMode.AUTO.value,
+            "transactionMode": airplane_tests.sql.TransactionMode.AUTO.value,
         },
         {
             "db": "bar",

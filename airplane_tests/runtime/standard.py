@@ -4,10 +4,10 @@ import backoff
 import deprecation
 import requests
 
-from airplane._version import __version__
-from airplane.api.client import api_client_from_env
-from airplane.api.entities import PromptReviewers, Run, RunStatus, TaskReviewer
-from airplane.exceptions import (
+from airplane_tests._version import __version__
+from airplane_tests.api.client import api_client_from_env
+from airplane_tests.api.entities import PromptReviewers, Run, RunStatus, TaskReviewer
+from airplane_tests.exceptions import (
     TASK_MUST_BE_REQUESTED_ERROR_CODE,
     HTTPError,
     PromptPendingException,
@@ -16,7 +16,7 @@ from airplane.exceptions import (
     RunPendingException,
     RunTerminationException,
 )
-from airplane.params import ParamTypes, SerializedParam
+from airplane_tests.params import ParamTypes, SerializedParam
 
 
 def execute(

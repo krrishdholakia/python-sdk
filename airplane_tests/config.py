@@ -10,13 +10,13 @@ import typing_extensions
 from docstring_parser import parse
 from typing_extensions import Literal, ParamSpec
 
-from airplane.api.entities import Run
-from airplane.exceptions import (
+from airplane_tests.api.entities import Run
+from airplane_tests.exceptions import (
     InvalidAnnotationException,
     InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
-from airplane.params import (
+from airplane_tests.params import (
     SERIALIZED_DATE_FORMAT,
     SERIALIZED_DATETIME_FORMAT,
     SERIALIZED_DATETIME_MILLISECONDS_FORMAT,
@@ -30,9 +30,9 @@ from airplane.params import (
     serialize_param,
     to_airplane_type,
 )
-from airplane.runtime import execute
-from airplane.types import ConfigVar, File, RuntimeType
-from airplane.utils import make_slug
+from airplane_tests.runtime import execute
+from airplane_tests.types import ConfigVar, File, RuntimeType
+from airplane_tests.utils import make_slug
 
 # Restrict task execution so it can only be called from other tasks or views.
 TaskCaller = Literal["task", "view"]

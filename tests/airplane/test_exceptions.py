@@ -1,5 +1,5 @@
-from airplane.api.entities import Run, RunStatus
-from airplane.exceptions import RunTerminationException
+from airplane_tests.api.entities import Run, RunStatus
+from airplane_tests.exceptions import RunTerminationException
 
 
 def test_run_termination_error() -> None:

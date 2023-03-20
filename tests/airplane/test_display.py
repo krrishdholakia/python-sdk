@@ -1,7 +1,7 @@
 from unittest import mock
 
-from airplane import display
-from airplane._version import __version__
+from airplane_tests import display
+from airplane_tests._version import __version__
 
 
 @mock.patch("airplane.display.api_client_from_env")

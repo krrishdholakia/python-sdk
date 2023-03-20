@@ -2,7 +2,7 @@ from typing import Any, Iterable
 
 import pytest
 
-from airplane.output import __json_dumps, __to_output_path
+from airplane_tests.output import __json_dumps, __to_output_path
 
 
 @pytest.mark.parametrize(

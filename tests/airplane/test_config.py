@@ -5,9 +5,9 @@ from unittest import mock
 import pytest
 from typing_extensions import Annotated
 
-from airplane._version import __version__
-from airplane.api.entities import Run, RunStatus
-from airplane.config import (
+from airplane_tests._version import __version__
+from airplane_tests.api.entities import Run, RunStatus
+from airplane_tests.config import (
     EnvVar,
     LabeledOption,
     ParamConfig,
@@ -17,13 +17,13 @@ from airplane.config import (
     TaskDef,
     task,
 )
-from airplane.exceptions import (
+from airplane_tests.exceptions import (
     InvalidAnnotationException,
     InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
-from airplane.types import SQL, ConfigVar, File, LongText
-from airplane.utils import make_slug
+from airplane_tests.types import SQL, ConfigVar, File, LongText
+from airplane_tests.utils import make_slug
 
 # pylint: disable=protected-access
 

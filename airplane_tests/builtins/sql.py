@@ -2,9 +2,9 @@ import textwrap
 from enum import Enum
 from typing import Any, Dict, Optional, cast
 
-from airplane.api.entities import BuiltInRun
-from airplane.builtins import __convert_resource_alias_to_id
-from airplane.runtime import __execute_internal
+from airplane_tests.api.entities import BuiltInRun
+from airplane_tests.builtins import __convert_resource_alias_to_id
+from airplane_tests.runtime import __execute_internal
 
 
 class TransactionMode(Enum):

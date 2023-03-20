@@ -4,9 +4,9 @@ from typing import Any, Dict, List, Optional, Set, Union
 
 import deprecation
 
-from airplane._version import __version__
-from airplane.api.client import api_client_from_env
-from airplane.types import File, JSONType
+from airplane_tests._version import __version__
+from airplane_tests.api.client import api_client_from_env
+from airplane_tests.types import File, JSONType
 
 
 def text(content: str, dedent: bool = True) -> None:
