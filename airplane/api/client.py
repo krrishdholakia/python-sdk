@@ -157,7 +157,6 @@ class APIClient:
             "/v0/runs/getOutputs",
             params={"id": run_id},
         )
-
         return resp["output"]
 
     def get_run_output_from_zone(self, run_id: str) -> Any:
