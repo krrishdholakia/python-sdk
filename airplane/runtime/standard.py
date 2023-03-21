@@ -85,7 +85,12 @@ def execute(
             raise ValueError("Unable to find run ID for completed request")
 
     run_info = __wait_for_run_completion(run_id)
-    outputs = client.get_run_output(run_id)
+    use_zone = run_info.get("zoneID", None) is not None
+    if use_zone:
+        outputs = client.get_run_output_from_zone(run_id)
+    else:
+        outputs = client.get_run_output(run_id)
+
     # pylint: disable=redefined-outer-name
     run = Run(
         id=run_info["id"],
@@ -129,7 +134,12 @@ def run(
     client = api_client_from_env()
     run_id = client.create_run(task_id, parameters, env, constraints)
     run_info = __wait_for_run_completion(run_id)
-    outputs = client.get_run_output(run_id)
+    use_zone = run_info.get("zoneID", None) is not None
+    if use_zone:
+        outputs = client.get_run_output_from_zone(run_id)
+    else:
+        outputs = client.get_run_output(run_id)
+
     return {"status": run_info["status"], "outputs": outputs}
 
 

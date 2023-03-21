@@ -13,7 +13,11 @@ from typing_extensions import Literal
 
 from airplane._version import __version__
 from airplane.api.entities import PromptReviewers, TaskReviewer
-from airplane.exceptions import HTTPError, InvalidEnvironmentException
+from airplane.exceptions import (
+    HTTPError,
+    InvalidEnvironmentException,
+    InvalidZoneException,
+)
 from airplane.params import ParamTypes, SerializedParam, serialize_param
 from airplane.types import File, JSONType
 
@@ -135,7 +139,7 @@ class APIClient:
         return resp
 
     def get_run_output(self, run_id: str) -> Any:
-        """Fetches an Airplane's run output.
+        """Fetches an Airplane run's output from the Airplane API.
 
         Args:
             run_id: The id of the run for which to fetch output.
@@ -154,6 +158,62 @@ class APIClient:
             params={"id": run_id},
         )
         return resp["output"]
+
+    def get_run_output_from_zone(self, run_id: str) -> Any:
+        """Fetches an Airplane run's output from a self-hosted storage zone.
+
+        Args:
+            run_id: The id of the run for which to fetch output.
+
+        Returns:
+            The Airplane run's outputs.
+
+        Raises:
+            HTTPError: If the run outputs cannot be fetched.
+            InvalidZoneException: If the zone info response is invalid.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        zone_info = self.get_run_zone(run_id)
+        if (
+            zone_info is None
+            or "accessToken" not in zone_info
+            or "dataPlaneURL" not in zone_info
+        ):
+            raise InvalidZoneException(
+                f"Missing required fields in zone info response: {zone_info}",
+            )
+        resp = self.__request(
+            "GET",
+            "/v0/dp/runs/getOutputs",
+            params={"runID": run_id},
+            extra_headers={
+                "X-Airplane-Dataplane-Token": zone_info["accessToken"],
+            },
+            host=zone_info["dataPlaneURL"],
+        )
+        return resp["output"]
+
+    def get_run_zone(self, run_id: str) -> Any:
+        """Fetches information about the storage zone for a run.
+
+        Args:
+            run_id: The id of the run for which to fetch zone information.
+
+        Returns:
+            The run's zone.
+
+        Raises:
+            HTTPError: If the run zone cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "GET",
+            "/v0/runs/getZone",
+            params={"id": run_id},
+        )
+        return resp
 
     def create_text_display(self, content: str) -> str:
         """Creates a text display.
@@ -440,6 +500,8 @@ class APIClient:
         path: str,
         params: Optional[Dict[str, Any]] = None,
         body: Optional[JSONType] = None,
+        extra_headers: Optional[Dict[str, str]] = None,
+        host: Optional[str] = None,
     ) -> Any:
         """Issues an Airplane API request.
 
@@ -448,6 +510,8 @@ class APIClient:
             path: The API path to request (usually starting with `/v0/`).
             params: Optional query parameters to attach to the URL.
             body: Optional JSON body to send in the request.
+            extra_headers: Optional extra headers to add to the request.
+            host: Optional host. If unset, uses the configured Airplane API host.
 
         Returns:
             The deserialized JSON contents of the API response.
@@ -478,10 +542,20 @@ class APIClient:
         if self._opts.sandbox_token:
             headers["X-Airplane-Sandbox-Token"] = self._opts.sandbox_token
 
+        if extra_headers:
+            for key, value in extra_headers.items():
+                headers[key] = value
+
         retries = 0
         # Perform up to 10 total attempts.
         max_retries = 9
         retry_after_seconds = 0
+
+        if host:
+            url = host + path
+        else:
+            url = self._opts.api_host + path
+
         while True:
             try:
                 duration_seconds = _compute_retry_delay(retries)
@@ -493,7 +567,7 @@ class APIClient:
 
                 resp = requests.request(
                     method,
-                    url=self._opts.api_host + path,
+                    url=url,
                     params=params,
                     json=body,
                     headers=headers,
