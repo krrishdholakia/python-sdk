@@ -543,7 +543,7 @@ class APIClient:
             headers["X-Airplane-Sandbox-Token"] = self._opts.sandbox_token
 
         if extra_headers:
-            for key, value in headers.items():
+            for key, value in extra_headers.items():
                 headers[key] = value
 
         retries = 0
