@@ -52,5 +52,5 @@ def upload(payload: Union[bytes, str], file_name: Optional[str] = None) -> File:
 
     return File(
         id=upload_response["upload"]["id"],
-        url=upload_response["upload"]["url"],
+        url=upload_response["readOnlyURL"],
     )
