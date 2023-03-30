@@ -10,6 +10,8 @@ from typing import (
     Mapping,
     NewType,
     Optional,
+    Tuple,
+    TypedDict,
     TypeVar,
     Union,
 )
@@ -144,3 +146,81 @@ class Run(Generic[JSONTypeT]):
     param_values: Dict[str, Any]
     status: RunStatus
     output: JSONType
+
+
+TriggerRequestStatus = Literal["pending", "approved", "rejected"]
+
+
+class TriggerReceipt(TypedDict):
+    taskRunID: Optional[str]
+    runbookSessionID: Optional[str]
+
+
+class Reviewer(TypedDict):
+    userID: str
+    groupID: str
+
+
+class Trigger(TypedDict):
+    triggerID: str
+    teamID: str
+    name: str
+    description: str
+    slug: Optional[str]
+    taskID: Optional[str]
+    runbookID: Optional[str]
+    kind: TriggerKind
+    disabledAt: Optional[str]
+    disabledReason: Optional[str]
+    envID: str
+    createdAt: str
+    createdBy: str
+    updatedAt: str
+    updatedBy: str
+    archivedAt: Optional[str]
+    archivedBy: Optional[str]
+
+
+class Task(TypedDict):
+    id: str
+    name: str
+    slug: str
+    description: str
+    image: Optional[str]
+    command: List[str]
+    arguments: List[str]
+    parameters: Dict[str, Any]
+    resourceRequests: dict[str, Any]
+    resources: dict[str, Any]
+    kindOptions: dict[str, Any]
+    repo: str
+    requireExplicitPermissions: bool
+    timeout: int
+    isArchived: bool
+    parentFolderID: Optional[str]
+    createdAt: str
+    updatedAt: str
+    revisionID: str
+    deploymentID: Optional[str]
+    triggers: List[Trigger]
+
+
+class TriggerRequest(TypedDict):
+    iD: str
+    teamID: str
+    createdAt: str
+    createdBy: str
+    reason: str
+    triggerReceipt: Optional[TriggerReceipt]
+    status: TriggerRequestStatus
+    reviewers: List[Reviewer]
+    executedAt: Optional[str]
+    executedBy: Optional[str]
+    rejectedReason: Optional[str]
+    rejectedAt: Optional[str]
+    rejectedBy: Optional[str]
+
+
+class TaskReviewers(TypedDict):
+    task: Optional[Task]
+    reviewers: Optional[List[Reviewer]]

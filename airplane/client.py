@@ -12,7 +12,6 @@ from requests import Response
 from typing_extensions import Literal
 
 from airplane._version import __version__
-from airplane.api.entities import PromptReviewers, TaskReviewer
 from airplane.exceptions import (
     HTTPError,
     InvalidEnvironmentException,
@@ -20,12 +19,11 @@ from airplane.exceptions import (
 )
 from airplane.params import (
     InputParam,
-    ParamTypes,
     SerializedParam,
     SerializedParamValue,
     serialize_param,
 )
-from airplane.types import File, JSONType, PromptReviewers, TaskReviewer
+from airplane.types import File, JSONType, PromptReviewers, TaskReviewer, TriggerRequest
 
 
 @dataclass(frozen=True)
@@ -439,7 +437,7 @@ class APIClient:
         )
         return resp
 
-    def get_trigger_request(self, trigger_request_id: str) -> Dict[str, Any]:
+    def get_trigger_request(self, trigger_request_id: str) -> TriggerRequest:
         """Fetches an Airplane trigger request.
 
         Args:
