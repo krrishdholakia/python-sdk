@@ -55,12 +55,15 @@ class RunTerminationException(Exception):
     """Exception that indicates a run failed or was cancelled."""
 
     run: Run
+    slug: Optional[str]
 
     def __str__(self) -> str:
         if isinstance(self.run.output, dict) and isinstance(
             self.run.output.get("error"), str
         ):
             return self.run.output["error"]
+        if self.slug:
+            return f'Run for task "{self.slug}" {str(self.run.status.value).lower()}'
         return f"Run {str(self.run.status.value).lower()}"
 
 

@@ -46,6 +46,8 @@ def execute(
         run_id = client.execute_task(slug, param_values, resources)
     except HTTPError as err:
         if err.error_code != TASK_MUST_BE_REQUESTED_ERROR_CODE:
+            if err.status_code >= 400 and err.status_code < 500:
+                err.message = f'Failed to execute task "{slug}": {err.message}'
             raise
         task_reviewers_info = client.get_task_reviewers(slug)
         form_trigger = None
@@ -82,7 +84,11 @@ def execute(
 
         if not run_id:
             # pylint: disable=raise-missing-from
-            raise ValueError("Unable to find run ID for completed request")
+            raise HTTPError(
+                message="Unable to find run ID for completed request",
+                status_code=err.status_code,
+                error_code=err.error_code,
+            )
 
     run_info = __wait_for_run_completion(run_id)
     use_zone = run_info.get("zoneID", None) is not None
@@ -101,7 +107,7 @@ def execute(
     )
 
     if run.status in {RunStatus.FAILED, RunStatus.CANCELLED}:
-        raise RunTerminationException(run)
+        raise RunTerminationException(run, slug)
 
     return run
 
