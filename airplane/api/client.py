@@ -494,6 +494,27 @@ class APIClient:
         )
         return resp["triggerRequestID"]
 
+    def generate_id_token(self, audience: str) -> str:
+        """Generates an OIDC ID token.
+
+        Args:
+            audience: Intended audience for the token.
+
+        Returns:
+            The id token.
+
+        Raises:
+            HTTPError: If the display could not be created.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request(
+            "POST",
+            "/v0/oidc/generateIDToken",
+            body={"audience": audience},
+        )
+        return resp["token"]
+
     def __request(
         self,
         method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"],
