@@ -131,6 +131,8 @@ def task(
     allow_self_approvals: bool = True,
     restrict_callers: Optional[List[TaskCaller]] = None,
     timeout: int = 3600,
+    concurrency_key: Optional[str] = None,
+    concurrency_limit: Optional[int] = None,
     constraints: Optional[Dict[str, str]] = None,
     resources: Optional[List[Resource]] = None,
     schedules: Optional[List[Schedule]] = None,
@@ -191,6 +193,11 @@ def task(
             and hides the task in the UI.
         timeout:
             How long a task can run (in seconds) for before it is automatically cancelled.
+        concurrency_key:
+            Restricts runs with the same concurrency key from executing at the same time.
+        concurrency_limit:
+            If concurrency key is set, only allows this task's runs to start if the number of
+            other active runs with the same key is below this limit.
         constraints:
             Constraints for which agents are allowed to execute this task's runs, only
             applicable for users with self hosted agents.
@@ -219,6 +226,8 @@ def task(
             allow_self_approvals=allow_self_approvals,
             restrict_callers=restrict_callers,
             timeout=timeout,
+            concurrency_key=concurrency_key,
+            concurrency_limit=concurrency_limit,
             constraints=constraints,
             resources=resources,
             schedules=schedules,
@@ -276,6 +285,8 @@ class TaskDef:
     allow_self_approvals: Optional[bool]
     restrict_callers: Optional[List[TaskCaller]]
     timeout: Optional[int]
+    concurrency_key: Optional[str]
+    concurrency_limit: Optional[int]
     constraints: Optional[Dict[str, str]]
     resources: Optional[List[Resource]]
     schedules: Optional[List[Schedule]]
@@ -330,6 +341,8 @@ class TaskDef:
         allow_self_approvals: bool,
         restrict_callers: Optional[List[TaskCaller]],
         timeout: int,
+        concurrency_key: Optional[str],
+        concurrency_limit: Optional[int],
         constraints: Optional[Dict[str, str]],
         resources: Optional[List[Resource]],
         schedules: Optional[List[Schedule]],
@@ -429,6 +442,8 @@ class TaskDef:
             allow_self_approvals=allow_self_approvals,
             restrict_callers=restrict_callers,
             timeout=timeout,
+            concurrency_key=concurrency_key,
+            concurrency_limit=concurrency_limit,
             constraints=constraints,
             schedules=schedules,
             resources=resources,
