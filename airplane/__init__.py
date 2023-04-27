@@ -1,6 +1,6 @@
 """airplane - An SDK for writing Airplane tasks in Python"""
 
-from airplane import auth, display, files
+from airplane import auth, display, files, sleep
 from airplane._version import __version__
 from airplane.api.client import APIClient
 from airplane.api.entities import PromptReviewers, Run, RunStatus

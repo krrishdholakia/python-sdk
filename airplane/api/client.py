@@ -12,7 +12,7 @@ from requests import Response
 from typing_extensions import Literal
 
 from airplane._version import __version__
-from airplane.api.entities import PromptReviewers, TaskReviewer
+from airplane.api.entities import PromptReviewers, Sleep, TaskReviewer
 from airplane.exceptions import (
     HTTPError,
     InvalidEnvironmentException,
@@ -514,6 +514,49 @@ class APIClient:
             body={"audience": audience},
         )
         return resp["token"]
+
+    def create_sleep(self, seconds: float, until: str) -> str:
+        """Creates an Airplane sleep.
+        Args:
+            seconds: Duration of the sleep in seconds.
+            until: Time to sleep until in RFC3339 format.
+        Raises:
+            HTTPError: If the sleep cannot be created properly.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        duration_ms = int(seconds * 1000)
+        resp = self.__request(
+            "POST",
+            "/v0/sleeps/create",
+            body={
+                "durationMs": duration_ms,
+                "until": until,
+            },
+        )
+        return resp["id"]
+
+    def get_sleep(self, sleep_id: str) -> Sleep:
+        """Fetches an Airplane sleep.
+        Args:
+            sleep_id: The id of the sleep to fetch.
+        Returns:
+            The Airplane sleep's attributes.
+        Raises:
+            HTTPError: If the sleep cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request("GET", "/v0/sleeps/get", params={"id": sleep_id})
+        return Sleep(
+            id=resp["id"],
+            run_id=resp["runID"],
+            created_at=resp["createdAt"],
+            until=resp["until"],
+            duration_ms=resp["durationMs"],
+            skipped_at=resp.get("skippedAt"),
+            skipped_by=resp.get("skippedBy"),
+        )
 
     def __request(
         self,

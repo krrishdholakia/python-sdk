@@ -96,3 +96,16 @@ class TaskReviewer:
 
     group_id: Optional[str] = None
     user_id: Optional[str] = None
+
+
+@dataclass
+class Sleep:
+    """Airplane sleep object."""
+
+    id: str
+    run_id: str
+    created_at: str
+    until: str
+    duration_ms: int
+    skipped_at: Optional[str]
+    skipped_by: Optional[str]
