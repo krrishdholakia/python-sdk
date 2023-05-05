@@ -26,6 +26,7 @@ def test_empty_prompt(mocked_client: mock.MagicMock) -> None:
         confirm_text=None,
         cancel_text=None,
         description=None,
+        notify=True,
     )
     get_prompt.assert_called_with("prm123")
 
@@ -104,6 +105,7 @@ def test_prompt_with_parameters(mocked_client: mock.MagicMock) -> None:
         confirm_text=None,
         cancel_text=None,
         description=None,
+        notify=True,
     )
     get_prompt.assert_called_with("prm123")
 
@@ -130,6 +132,7 @@ def test_prompt_with_options(mocked_client: mock.MagicMock) -> None:
             groups=["group1", "group2"],
             allow_self_approvals=True,
         ),
+        notify=True,
     )
     assert values == {}
 
@@ -143,5 +146,6 @@ def test_prompt_with_options(mocked_client: mock.MagicMock) -> None:
         confirm_text="Confirm",
         cancel_text="Cancel",
         description="Description",
+        notify=True,
     )
     get_prompt.assert_called_with("prm123")

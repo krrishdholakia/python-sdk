@@ -188,6 +188,7 @@ def prompt_background(
     confirm_text: Optional[str] = None,
     cancel_text: Optional[str] = None,
     description: Optional[str] = None,
+    notify: bool = True,
 ) -> str:
     """Creates a prompt in the background, returning the prompt ID."""
 
@@ -198,6 +199,7 @@ def prompt_background(
         confirm_text=confirm_text,
         cancel_text=cancel_text,
         description=description,
+        notify=notify,
     )
 
 
@@ -216,3 +218,15 @@ def wait_for_prompt(prompt_id: str) -> Dict[str, Any]:
     if not prompt_info["submittedAt"]:
         raise PromptPendingException()
     return prompt_info
+
+
+def get_prompt(prompt_id: str) -> Dict[str, Any]:
+    """Fetches a prompt by ID."""
+    client = api_client_from_env()
+    return client.get_prompt(prompt_id)
+
+
+def get_user(user_id: str) -> Dict[str, Any]:
+    """Fetches a user by ID."""
+    client = api_client_from_env()
+    return client.get_prompt(user_id)

@@ -351,6 +351,7 @@ class APIClient:
         confirm_text: Optional[str],
         cancel_text: Optional[str],
         description: Optional[str],
+        notify: bool,
     ) -> str:
         """Creates an Airplane prompt.
 
@@ -360,6 +361,7 @@ class APIClient:
             confirm_text: Text of the confirmation button on the prompt dialog.
             cancel_text: Text of the cancellation button on the prompt dialog.
             description: Prompt description to display. Supports markdown.
+            notify: Whether to notify reviewers when the prompt is created.
 
         Raises:
             HTTPError: If the prompt cannot be created properly.
@@ -383,6 +385,7 @@ class APIClient:
                 "confirmText": confirm_text,
                 "cancelText": cancel_text,
                 "description": description,
+                "notify": notify,
             },
         )
         return resp["id"]
@@ -403,6 +406,23 @@ class APIClient:
         """
         resp = self.__request("GET", "/v0/prompts/get", params={"id": prompt_id})
         return resp["prompt"]
+
+    def get_user(self, user_id: str) -> Dict[str, Any]:
+        """Fetches an Airplane user.
+
+        Args:
+            user_id: The id of the user to fetch.
+
+        Returns:
+            The Airplane user's attributes.
+
+        Raises:
+            HTTPError: If the user cannot be fetched.
+            requests.exceptions.Timeout: If the request times out.
+            requests.exceptions.ConnectionError: If a network error occurs.
+        """
+        resp = self.__request("GET", "/v0/users/get", params={"userID": user_id})
+        return resp["user"]
 
     def get_task_reviewers(self, slug: str) -> Dict[str, Any]:
         """Fetches reviewers for an Airplane task.

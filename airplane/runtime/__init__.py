@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union, overload
 import inflection
 from typing_extensions import Literal
 
-from airplane.api.entities import PromptReviewers, Run
+from airplane.api.entities import PromptReviewers, Run, User
 from airplane.params import (
     SERIALIZED_DATE_FORMAT,
     SERIALIZED_DATETIME_FORMAT,
@@ -23,6 +23,8 @@ from airplane.params import (
 )
 from airplane.runtime.standard import (
     execute as standard_execute,
+    get_prompt as standard_get_prompt,
+    get_user as standard_get_user,
     prompt_background as standard_prompt_background,
     wait_for_prompt as standard_wait_for_prompt,
 )
@@ -133,6 +135,26 @@ class Prompt:
 
         return prompt_values
 
+    def submitter(self) -> Optional[User]:
+        """Returns the user who submitted the prompt, if there is one."""
+        runtime_kind = os.environ.get(
+            _AIRPLANE_RUNTIME_ENV_VAR, RuntimeKind.STANDARD.value
+        )
+
+        if runtime_kind == RuntimeKind.WORKFLOW.value:
+            raise NotImplementedError("Workflow run not supported yet by python sdk")
+
+        prompt_info = standard_get_prompt(self.prompt_id)
+        if prompt_info.get("submittedBy") is None:
+            return None
+
+        user_info = standard_get_user(prompt_info["submittedBy"])
+        return User(
+            id=user_info["id"],
+            email=user_info["email"],
+            name=user_info["name"],
+        )
+
 
 @overload
 def prompt(
@@ -143,6 +165,7 @@ def prompt(
     cancel_text: Optional[str] = None,
     description: Optional[str] = None,
     background: Literal[False] = False,
+    notify: bool = True,
 ) -> Dict[str, Any]:
     ...
 
@@ -156,6 +179,7 @@ def prompt(
     cancel_text: Optional[str] = None,
     description: Optional[str] = None,
     background: Literal[True],
+    notify: bool = True,
 ) -> Prompt:
     ...
 
@@ -168,6 +192,7 @@ def prompt(
     cancel_text: Optional[str] = None,
     description: Optional[str] = None,
     background: bool = False,
+    notify: bool = True,
 ) -> Union[Dict[str, Any], Prompt]:
     """Prompts an operator for input.
 
@@ -190,6 +215,7 @@ def prompt(
         background: If true, the prompt will be created in the background and a
             `Prompt` object will be returned. To wait for the prompt to be submitted,
             call `prompt.wait()`.
+        notify: If true, the prompt will send a notification to the reviewers.
 
     Raises:
         NotImplementedError: For workflow runs.
@@ -254,6 +280,7 @@ def prompt(
         confirm_text=confirm_text,
         cancel_text=cancel_text,
         description=description,
+        notify=notify,
     )
     background_prompt = Prompt(prompt_id, serialized_params)
 

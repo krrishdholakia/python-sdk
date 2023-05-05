@@ -109,3 +109,12 @@ class Sleep:
     duration_ms: int
     skipped_at: Optional[str]
     skipped_by: Optional[str]
+
+
+@dataclass
+class User:
+    """Airplane user."""
+
+    id: str
+    email: str
+    name: str
