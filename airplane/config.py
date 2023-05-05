@@ -37,6 +37,8 @@ from airplane.utils import make_slug
 # Restrict task execution so it can only be called from other tasks or views.
 TaskCaller = Literal["task", "view"]
 
+DefaultRunPermission = Literal["task-viewers", "task-participants"]
+
 
 @dataclasses.dataclass(frozen=True)
 class Resource:
@@ -130,6 +132,7 @@ def task(
     require_requests: bool = False,
     allow_self_approvals: bool = True,
     restrict_callers: Optional[List[TaskCaller]] = None,
+    default_run_permissions: Optional[DefaultRunPermission] = None,
     timeout: int = 3600,
     concurrency_key: Optional[str] = None,
     concurrency_limit: Optional[int] = None,
@@ -191,6 +194,9 @@ def task(
         restrict_callers:
             Restrict task execution to specific callers. This disables direct execution
             and hides the task in the UI.
+        default_run_permissions:
+            Manage who has permissions for new runs of this task. If not provided,
+            defaults to "task-viewers".
         timeout:
             How long a task can run (in seconds) for before it is automatically cancelled.
         concurrency_key:
@@ -226,6 +232,7 @@ def task(
             allow_self_approvals=allow_self_approvals,
             restrict_callers=restrict_callers,
             timeout=timeout,
+            default_run_permissions=default_run_permissions,
             concurrency_key=concurrency_key,
             concurrency_limit=concurrency_limit,
             constraints=constraints,
@@ -287,6 +294,7 @@ class TaskDef:
     timeout: Optional[int]
     concurrency_key: Optional[str]
     concurrency_limit: Optional[int]
+    default_run_permissions: Optional[DefaultRunPermission]
     constraints: Optional[Dict[str, str]]
     resources: Optional[List[Resource]]
     schedules: Optional[List[Schedule]]
@@ -343,6 +351,7 @@ class TaskDef:
         timeout: int,
         concurrency_key: Optional[str],
         concurrency_limit: Optional[int],
+        default_run_permissions: Optional[DefaultRunPermission],
         constraints: Optional[Dict[str, str]],
         resources: Optional[List[Resource]],
         schedules: Optional[List[Schedule]],
@@ -444,6 +453,7 @@ class TaskDef:
             timeout=timeout,
             concurrency_key=concurrency_key,
             concurrency_limit=concurrency_limit,
+            default_run_permissions=default_run_permissions,
             constraints=constraints,
             schedules=schedules,
             resources=resources,
