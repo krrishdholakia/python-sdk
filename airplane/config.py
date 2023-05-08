@@ -10,6 +10,7 @@ import typing_extensions
 from docstring_parser import parse
 from typing_extensions import Literal, ParamSpec
 
+from airplane._version import __version__
 from airplane.api.entities import Run
 from airplane.exceptions import (
     InvalidAnnotationException,
@@ -300,6 +301,7 @@ class TaskDef:
     schedules: Optional[List[Schedule]]
     parameters: Optional[List[ParamDef]]
     env_vars: Optional[List[EnvVar]]
+    sdk_version: str = dataclasses.field(default=__version__, init=False)
 
     def run(self, params: Dict[str, Any]) -> Any:
         """Execute task function from param dictionary"""

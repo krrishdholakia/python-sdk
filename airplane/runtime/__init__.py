@@ -150,7 +150,7 @@ class Prompt:
 
         user_info = standard_get_user(prompt_info["submittedBy"])
         return User(
-            id=user_info["id"],
+            id=user_info["userID"],
             email=user_info["email"],
             name=user_info["name"],
         )

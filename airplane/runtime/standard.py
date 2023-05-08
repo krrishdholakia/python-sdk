@@ -229,4 +229,4 @@ def get_prompt(prompt_id: str) -> Dict[str, Any]:
 def get_user(user_id: str) -> Dict[str, Any]:
     """Fetches a user by ID."""
     client = api_client_from_env()
-    return client.get_prompt(user_id)
+    return client.get_user(user_id)
