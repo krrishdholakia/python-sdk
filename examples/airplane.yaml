@@ -1,0 +1,6 @@
+python:
+  version: "3.10"
+  base: full
+  # We uninstall the SDK that is installed by default in the base image
+  # to use the version specified in the requirements.txt file.
+  preinstall: pip uninstall -y airplanesdk
