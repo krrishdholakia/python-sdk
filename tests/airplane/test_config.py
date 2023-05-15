@@ -8,13 +8,13 @@ from typing_extensions import Annotated
 from airplane._version import __version__
 from airplane.api.entities import Run, RunStatus
 from airplane.config import (
+    Config,
     EnvVar,
     LabeledOption,
     ParamConfig,
     ParamDef,
     Resource,
     Schedule,
-    TaskDef,
     task,
 )
 from airplane.exceptions import (
@@ -33,7 +33,7 @@ def test_definition_with_defaults() -> None:
     def my_task(param: str) -> str:
         return param
 
-    assert my_task.__airplane == TaskDef(  # type: ignore
+    assert my_task.__airplane == Config(  # type: ignore
         func=my_task.__wrapped__,  # type: ignore
         runtime="",
         slug="my_task",
@@ -167,7 +167,7 @@ def test_decorator_with_parameters() -> None:
     def my_task() -> None:
         pass
 
-    assert my_task.__airplane == TaskDef(  # type: ignore
+    assert my_task.__airplane == Config(  # type: ignore
         func=my_task.__wrapped__,  # type: ignore
         runtime="",
         slug="task_slug",
@@ -241,7 +241,7 @@ def test_param_configs() -> None:
             annotated_default,
         )
 
-    assert my_task.__airplane == TaskDef(  # type: ignore
+    assert my_task.__airplane == Config(  # type: ignore
         func=my_task.__wrapped__,  # type: ignore
         runtime="",
         slug="my_task",
@@ -887,7 +887,7 @@ def test_definition_nested_types() -> None:
         del param_optional, param_optional_nested
         return param
 
-    assert my_task.__airplane == TaskDef(  # type: ignore
+    assert my_task.__airplane == Config(  # type: ignore
         func=my_task.__wrapped__,  # type: ignore
         runtime="",
         slug="my_task",
@@ -952,7 +952,7 @@ def test_param_config_default() -> None:
         del foo, bar
         return foo
 
-    assert my_task.__airplane == TaskDef(  # type: ignore
+    assert my_task.__airplane == Config(  # type: ignore
         func=my_task.__wrapped__,  # type: ignore
         runtime="",
         slug="my_task",

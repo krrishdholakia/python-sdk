@@ -223,7 +223,7 @@ def task(
     def decorator(func: Callable[P, Any]) -> Callable[P, Run]:
         """Assigns an __airplane attribute to a function to mark it as an Airplane object"""
 
-        config = TaskDef.build(
+        config = Config.build(
             func=func,
             runtime="",
             slug=slug,
@@ -280,7 +280,7 @@ class ParamDef:
 
 
 @dataclasses.dataclass(frozen=True)
-class TaskDef:
+class Config:
     """Task definition"""
 
     func: Callable[..., Any]
@@ -358,7 +358,7 @@ class TaskDef:
         resources: Optional[List[Resource]],
         schedules: Optional[List[Schedule]],
         env_vars: Optional[List[EnvVar]],
-    ) -> "TaskDef":
+    ) -> "Config":
         """Construct a task definition from a function."""
         task_description = description
         if func.__doc__ is None:
