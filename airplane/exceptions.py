@@ -33,6 +33,13 @@ class PromptPendingException(Exception):
     """Exception that indicates a prompt is still in pending state."""
 
 
+class PromptCancelledError(Exception):
+    """Exception that indicates a prompt has been cancelled."""
+
+    def __str__(self) -> str:
+        return "Prompt cancelled."
+
+
 class InvalidEnvironmentException(Exception):
     """Exception that indicates an improperly configured environment."""
 

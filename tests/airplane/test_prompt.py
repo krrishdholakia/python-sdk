@@ -1,9 +1,11 @@
 from unittest import mock
 
+import pytest
 from typing_extensions import Annotated
 
 from airplane import SQL, LabeledOption, ParamConfig, PromptReviewers, prompt
 from airplane._version import __version__
+from airplane.exceptions import PromptCancelledError
 from airplane.params import Constraints, SerializedParam
 
 
@@ -11,7 +13,11 @@ from airplane.params import Constraints, SerializedParam
 def test_empty_prompt(mocked_client: mock.MagicMock) -> None:
     create_prompt = mock.Mock(return_value="prm123")
     get_prompt = mock.Mock(
-        return_value={"submittedAt": "2021-08-18T20:00:00.000Z", "values": {}}
+        return_value={
+            "submittedAt": "2021-08-18T20:00:00.000Z",
+            "values": {},
+            "cancelledAt": None,
+        }
     )
     mocked_client.return_value = mock.Mock(
         create_prompt=create_prompt, get_prompt=get_prompt
@@ -37,6 +43,7 @@ def test_prompt_with_parameters(mocked_client: mock.MagicMock) -> None:
     get_prompt = mock.Mock(
         return_value={
             "submittedAt": "2021-08-18T20:00:00.000Z",
+            "cancelledAt": None,
             "values": {
                 "foo": "foo",
                 "bar": 1,
@@ -117,6 +124,7 @@ def test_prompt_with_options(mocked_client: mock.MagicMock) -> None:
         return_value={
             "submittedAt": "2021-08-18T20:00:00.000Z",
             "values": {},
+            "cancelledAt": None,
         }
     )
     mocked_client.return_value = mock.Mock(
@@ -149,3 +157,21 @@ def test_prompt_with_options(mocked_client: mock.MagicMock) -> None:
         notify=True,
     )
     get_prompt.assert_called_with("prm123")
+
+
+@mock.patch("airplane.runtime.standard.api_client_from_env")
+def test_prompt_cancelled(mocked_client: mock.MagicMock) -> None:
+    create_prompt = mock.Mock(return_value="prm123")
+    get_prompt = mock.Mock(
+        return_value={
+            "submittedAt": None,
+            "cancelledAt": "2021-08-18T20:00:00.000Z",
+            "values": {},
+        }
+    )
+    mocked_client.return_value = mock.Mock(
+        create_prompt=create_prompt, get_prompt=get_prompt
+    )
+
+    with pytest.raises(PromptCancelledError):
+        prompt()

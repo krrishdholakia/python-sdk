@@ -10,6 +10,7 @@ from airplane.api.entities import PromptReviewers, Run, RunStatus, TaskReviewer
 from airplane.exceptions import (
     TASK_MUST_BE_REQUESTED_ERROR_CODE,
     HTTPError,
+    PromptCancelledError,
     PromptPendingException,
     RequestPendingException,
     RequestRejectedException,
@@ -215,6 +216,8 @@ def wait_for_prompt(prompt_id: str) -> Dict[str, Any]:
     """Waits until a prompt is submitted and returns the prompt values."""
     client = api_client_from_env()
     prompt_info = client.get_prompt(prompt_id)
+    if prompt_info["cancelledAt"]:
+        raise PromptCancelledError()
     if not prompt_info["submittedAt"]:
         raise PromptPendingException()
     return prompt_info
