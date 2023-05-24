@@ -123,6 +123,48 @@ class Schedule:
     param_values: Optional[Dict[str, Optional[ParamTypes]]] = None
 
 
+@dataclasses.dataclass
+class PermissionAssignees:
+    """Airplane permission assignees.
+
+    Attributes:
+        users:
+            Users to assign the permission to. Users are referenced via their emails.
+        groups:
+            Groups to assign the permission to. Groups are referenced via their slugs.
+    """
+
+    users: Optional[List[str]] = None
+    groups: Optional[List[str]] = None
+
+
+@dataclasses.dataclass(frozen=True)
+class ExplicitPermissions:
+    """Airplane explicit permissions.
+
+    Explicit task permissions in Airplane allow users to configure granular group-based
+    or user-based permissions for the task:
+    https://docs.airplane.dev/platform/permissions#task-and-runbook-permissions
+
+    Attributes:
+        viewers:
+            Groups and users who can see task information, but can't request or execute tasks.
+        requesters:
+            Groups and users who have all the permission of viewers, and can also request tasks.
+        executers:
+            Groups and users who have all the permissions of requesters, and can also execute
+            tasks and other's requests.
+        admins:
+            Groups and users who have full access to the task, and can change task configurations
+            and permissions.
+    """
+
+    viewers: Optional[PermissionAssignees] = None
+    requesters: Optional[PermissionAssignees] = None
+    executers: Optional[PermissionAssignees] = None
+    admins: Optional[PermissionAssignees] = None
+
+
 P = ParamSpec("P")
 
 
@@ -141,6 +183,7 @@ def task(
     resources: Optional[List[Resource]] = None,
     schedules: Optional[List[Schedule]] = None,
     env_vars: Optional[List[EnvVar]] = None,
+    permissions: Optional[Union[Literal["team_access"], ExplicitPermissions]] = None,
 ) -> Callable[[Callable[P, Any]], Callable[P, Run]]:
     """Decorator used to define an Airplane task.
 
@@ -218,6 +261,10 @@ def task(
         env_vars:
             Enviornment variables to attach to this task. Environment variables allow users
             to configure constant values or reference config variables.
+        permissions:
+            Permissions determine the users and groups that can access the task. Permissions can
+            be set to "team_access" to allow full access to anyone on your team or to explicit
+            permissions to configure granular group-based or user-based permissions for the task.
     """
 
     def decorator(func: Callable[P, Any]) -> Callable[P, Run]:
@@ -240,6 +287,7 @@ def task(
             resources=resources,
             schedules=schedules,
             env_vars=env_vars,
+            permissions=permissions,
         )
 
         @functools.wraps(func)
@@ -301,6 +349,7 @@ class TaskDef:
     schedules: Optional[List[Schedule]]
     parameters: Optional[List[ParamDef]]
     env_vars: Optional[List[EnvVar]]
+    permissions: Optional[Union[Literal["team_access"], ExplicitPermissions]]
     sdk_version: str = dataclasses.field(default=__version__, init=False)
 
     def run(self, params: Dict[str, Any]) -> Any:
@@ -358,6 +407,7 @@ class TaskDef:
         resources: Optional[List[Resource]],
         schedules: Optional[List[Schedule]],
         env_vars: Optional[List[EnvVar]],
+        permissions: Optional[Union[Literal["team_access"], ExplicitPermissions]],
     ) -> "TaskDef":
         """Construct a task definition from a function."""
         task_description = description
@@ -461,5 +511,6 @@ class TaskDef:
             resources=resources,
             parameters=parameters,
             env_vars=env_vars,
+            permissions=permissions,
             entrypoint_func=func.__name__,
         )

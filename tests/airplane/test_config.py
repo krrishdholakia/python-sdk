@@ -9,9 +9,11 @@ from airplane._version import __version__
 from airplane.api.entities import Run, RunStatus
 from airplane.config import (
     EnvVar,
+    ExplicitPermissions,
     LabeledOption,
     ParamConfig,
     ParamDef,
+    PermissionAssignees,
     Resource,
     Schedule,
     TaskDef,
@@ -62,6 +64,7 @@ def test_definition_with_defaults() -> None:
                 regex=None,
             )
         ],
+        permissions=None,
         entrypoint_func="my_task",
         env_vars=None,
     )
@@ -186,7 +189,9 @@ def test_decorator_with_parameters() -> None:
         parameters=[],
         entrypoint_func="my_task",
         env_vars=None,
+        permissions=None,
     )
+
     # Description provided in decorator takes precednce
     @task(
         description="description",
@@ -202,6 +207,76 @@ def test_decorator_with_parameters() -> None:
         """Docstring"""
 
     assert my_task_2.__airplane.description == "Docstring"  # type: ignore
+
+
+def test_decorator_with_explicit_permissions() -> None:
+    permissions = ExplicitPermissions(
+        viewers=PermissionAssignees(users=["user1@airplane.dev", "user2@airplane.dev"]),
+        requesters=PermissionAssignees(groups=["support"]),
+        executers=PermissionAssignees(
+            users=["user3@airplane.dev"],
+            groups=["support2"],
+        ),
+        admins=PermissionAssignees(groups=["admins"]),
+    )
+
+    @task(
+        permissions=permissions,
+    )
+    def my_task() -> None:
+        pass
+
+    assert my_task.__airplane == TaskDef(  # type: ignore
+        func=my_task.__wrapped__,  # type: ignore
+        runtime="",
+        slug="my_task",
+        name="My task",
+        description=None,
+        require_requests=False,
+        allow_self_approvals=True,
+        restrict_callers=None,
+        timeout=3600,
+        concurrency_key=None,
+        concurrency_limit=None,
+        default_run_permissions=None,
+        constraints=None,
+        schedules=None,
+        resources=None,
+        parameters=[],
+        permissions=permissions,
+        entrypoint_func="my_task",
+        env_vars=None,
+    )
+
+
+def test_decorator_with_team_access_permissions() -> None:
+    @task(
+        permissions="team_access",
+    )
+    def my_task() -> None:
+        pass
+
+    assert my_task.__airplane == TaskDef(  # type: ignore
+        func=my_task.__wrapped__,  # type: ignore
+        runtime="",
+        slug="my_task",
+        name="My task",
+        description=None,
+        require_requests=False,
+        allow_self_approvals=True,
+        restrict_callers=None,
+        timeout=3600,
+        concurrency_key=None,
+        concurrency_limit=None,
+        default_run_permissions=None,
+        constraints=None,
+        schedules=None,
+        resources=None,
+        parameters=[],
+        permissions="team_access",
+        entrypoint_func="my_task",
+        env_vars=None,
+    )
 
 
 def test_param_configs() -> None:
@@ -331,6 +406,7 @@ def test_param_configs() -> None:
         ],
         env_vars=None,
         entrypoint_func="my_task",
+        permissions=None,
     )
 
 
@@ -940,6 +1016,7 @@ def test_definition_nested_types() -> None:
         ],
         entrypoint_func="my_task",
         env_vars=None,
+        permissions=None,
     )
 
 
@@ -994,6 +1071,7 @@ def test_param_config_default() -> None:
         ],
         entrypoint_func="my_task",
         env_vars=None,
+        permissions=None,
     )
 
     with pytest.raises(
