@@ -1,13 +1,15 @@
 from enum import Enum
 from typing import Any, Dict, Optional, Union, cast
 
-from typing_extensions import TypedDict
+import deprecation
+from typing_extensions import Literal, TypedDict
 
 from airplane.api.entities import BuiltInRun
 from airplane.builtins import __convert_resource_alias_to_id
 from airplane.runtime import __execute_internal
 
 
+@deprecation.deprecated(deprecated_in="0.3.29")
 class Method(Enum):
     """Valid HTTP methods for REST requests."""
 
@@ -36,7 +38,7 @@ class RequestOutput(TypedDict):
 
 def request(
     rest_resource: str,
-    method: Method,
+    method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"],
     path: str,
     headers: Optional[Dict[str, Any]] = None,
     url_params: Optional[Dict[str, Any]] = None,
@@ -65,13 +67,16 @@ def request(
         HTTPError: If the request builtin cannot be executed properly.
         RunTerminationException: If the run fails or is cancelled.
     """
-
+    if isinstance(method, Method):
+        method_str = method.value
+    else:
+        method_str = method
     return cast(
         BuiltInRun[RequestOutput],
         __execute_internal(
             "airplane:rest_request",
             {
-                "method": method.value,
+                "method": method_str,
                 "path": path,
                 "headers": headers,
                 "urlParams": url_params,
