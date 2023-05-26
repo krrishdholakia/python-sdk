@@ -4,7 +4,7 @@ from airplane import auth, display, files, sleep
 from airplane._version import __version__
 from airplane.api.client import APIClient
 from airplane.api.entities import PromptReviewers, Run, RunStatus
-from airplane.builtins import email, graphql, mongodb, rest, slack, sql
+from airplane.builtins import ai, email, graphql, mongodb, rest, slack, sql
 from airplane.config import (
     EnvVar,
     ExplicitPermissions,

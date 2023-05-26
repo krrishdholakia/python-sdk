@@ -12,7 +12,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7.0"
+python = "^3.7.1"
 requests = "^2.25.1"
 backoff = "^2.2.1"
 deprecation = "^2.1.0"
@@ -22,6 +22,7 @@ python-slugify = "^6.1.2"
 typing-extensions = "^4.3.0"
 filetype = "^1.2.0"
 pytimeparse2 = "^1.6.0"
+openai = "^0.27.7"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "2.17.0"
