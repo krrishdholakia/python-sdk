@@ -48,7 +48,7 @@ def test_chat_bot(mock_chat: Any) -> None:
     os.environ,
     {"OPENAI_API_KEY": "baz"},
 )
-@mock.patch("airplane.ai._chat", return_value='"kiwi"||["strawberry", "banana"]||0.7')
+@mock.patch("airplane.ai._chat", return_value='["strawberry", "banana"]||0.7')
 def test_function(mock_chat: Any) -> None:
     fruits = airplane.ai.Func(
         "return related fruits",

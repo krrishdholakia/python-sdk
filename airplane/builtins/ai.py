@@ -28,7 +28,6 @@ class Message:
 
 def chat(
     message: str,
-    instructions: Optional[str] = None,
     model: Optional[str] = None,
     temperature: Optional[float] = None,
 ) -> str:
@@ -36,12 +35,6 @@ def chat(
 
     Args:
         message: The message to send to the LLM.
-        instructions: Optional instructions for the LLM to follow for the provided message.
-            You may want to put additional context on how to handle the message, or provide
-            guidelines to the LLM as to how it should behave.
-            ex. "Speak like a pirate"
-            ex. "Be polite when answering questions"
-            ex. "Be concise with your answers"
         model: The model to use. Defaults to gpt-3.5-turbo for Open AI and claude-v1 for Anthropic.
         temperature: The temperature setting for the LLM. Defaults to 0.0. Lower temperatures will
             result in less variable output.
@@ -56,7 +49,7 @@ def chat(
     messages = [
         Message(
             role="system",
-            content=_get_base_prompt(instructions),
+            content=_get_base_prompt(),
         ),
         Message(role="user", content=message),
     ]
@@ -67,8 +60,13 @@ def chat(
 class ChatBot:
     """Implementation for a chat bot that maintains conversational history with the LLM.
 
-    Attributes:
-        history: The existing history of the chat conversation.
+    Args:
+        instructions: Optional instructions for the LLM to follow for the provided message.
+            You may want to provide additional context on how to handle the message, or provide
+            guidelines to the LLM as to how it should behave.
+            ex. "Speak like a pirate"
+            ex. "Be polite when answering questions"
+            ex. "Be concise with your answers"
         model: The model to use. Defaults to gpt-3.5-turbo for Open AI and claude-v1 for Anthropic.
         temperature: The temperature setting for the LLM. Defaults to 0.0. Lower temperatures will
             result in less variable output.
@@ -137,7 +135,7 @@ class Func:
 
     Returns:
         A tuple of the parsed response from the LLM and a confidence score. The response
-        will be any JSON-compatible value that is similar to the example outputs. The
+        will be any JSON-compatible value that is the same type of the example outputs. The
         confidence score will be between 0 and 1, and represents how confident the LLM is
         with its answer.
 
@@ -171,45 +169,53 @@ class Func:
         model: Optional[str] = None,
         temperature: Optional[float] = None,
     ) -> None:
-        example_string = "\n".join(
-            (json.dumps(example[0]) + "||" + json.dumps(example[1]) + "||" + "0.95")
-            for example in examples
-        )
-
-        self.prompt = Message(
-            role="system",
-            content=_get_base_prompt(
-                instructions
-                + "\n"
-                + "Examples: \n"
-                + example_string
-                + "\n"
-                + "You must use the response format: input||output||confidence\n"
-                + "Confidence is between 0 and 1 and denotes how confident you"
-                + "are with your output."
-            ),
-        )
+        self.prompt = _get_func_instructions(instructions, examples)
         self.model = model
         self.temperature = temperature
 
     def __call__(self, prompt: Any) -> Tuple[Any, float]:
         result = _chat(
-            [self.prompt, Message(role="user", content=json.dumps(prompt))],
+            [self.prompt, Message(role="user", content=f"{json.dumps(prompt)}||")],
             self.model,
             self.temperature,
         )
         parts = result.split("||")
-        if len(parts) < 3:
+        if len(parts) < 2:
             return parts[0], 0.0
         try:
-            confidence = float(parts[2])
+            confidence = float(parts[1])
         except ValueError:
             confidence = 0.0
         try:
             # Try to parse the result into a python object
-            return json.loads(parts[1]), confidence
+            return json.loads(parts[0]), confidence
         except json.JSONDecodeError:
-            return parts[1], confidence
+            return parts[0], confidence
+
+
+def _get_func_instructions(
+    instructions: str, examples: List[Tuple[Any, Any]]
+) -> Message:
+    user_examples = "\n".join(
+        (json.dumps(example[0]) + "||" + json.dumps(example[1]) + "||" + "1.0")
+        for example in examples
+    )
+
+    content = f"""Convert the input into the output, by following these instructions: {instructions}
+
+Examples:
+{user_examples}
+
+You must follow the example format: input||output||confidence. You will generate output||confidence.
+Confidence is a score between 0 and 1 and denotes how confident you are that the output is correct.
+All inputs are valid JSON and all outputs MUST be valid JSON. Follow the exact same format for the output
+as the examples above.
+Do not return anything other than output||confidence.
+
+Complete the following input:
+"""
+
+    return Message("system", content)
 
 
 def _chat(
@@ -296,6 +302,9 @@ def _get_base_prompt(
 ) -> str:
     return f"""Your name is Airplane assistant.
 
+# Date
+Your training ended in the past. Today is { datetime.now().isoformat() }.
+
 # Instructions
 You are an informative, direct and to-the-point assistant.
 Do not say that you are an AI language model.
@@ -305,7 +314,4 @@ Keep your answers short and impersonal.
 Your instructions tell you how to respond to a message, and you must always
 follow them very carefully.
 Your instructions are: {instructions}
-
-# Date
-Your training ended in the past. Today is { datetime.now().isoformat() }.
 """
