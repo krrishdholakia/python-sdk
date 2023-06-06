@@ -10,7 +10,7 @@ from typing_extensions import Literal
 
 from airplane.exceptions import InvalidEnvironmentException
 
-LOGGING = True
+logging = True  # pylint: disable=invalid-name
 
 
 @dataclass
@@ -223,7 +223,7 @@ def _chat(
     model: Optional[str],
     temperature: Optional[float],
 ) -> str:
-    if LOGGING:
+    if logging:
         print(f"AI Prompt: ({messages})")
 
     openai_api_key = os.environ.get("OPENAI_API_KEY")
@@ -239,7 +239,7 @@ def _chat(
             "Must specify one of OPENAI_API_KEY or ANTHROPIC_API_KEY"
         )
 
-    if LOGGING:
+    if logging:
         print(f"AI Response: ({response})")
     return response
 
