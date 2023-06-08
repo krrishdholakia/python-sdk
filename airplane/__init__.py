@@ -13,7 +13,11 @@ from airplane.config import (
     Schedule,
     task,
 )
-from airplane.exceptions import InvalidEnvironmentException, RunPendingException
+from airplane.exceptions import (
+    InvalidEnvironmentException,
+    PromptCancelledError,
+    RunPendingException,
+)
 from airplane.output import append_output, set_output, write_named_output, write_output
 from airplane.params import LabeledOption, ParamConfig
 from airplane.runtime import execute, prompt
