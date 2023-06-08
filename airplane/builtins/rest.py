@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Any, Dict, Optional, Union, cast
 
-import deprecation
 from typing_extensions import Literal, TypedDict
 
 from airplane.api.entities import BuiltInRun
@@ -9,7 +8,6 @@ from airplane.builtins import __convert_resource_alias_to_id
 from airplane.runtime import __execute_internal
 
 
-@deprecation.deprecated(deprecated_in="0.3.29")
 class Method(Enum):
     """Valid HTTP methods for REST requests."""
 
