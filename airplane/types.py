@@ -13,6 +13,7 @@ FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 if TYPE_CHECKING:
     LongText = str
     SQL = str
+    JSON = JSONType
 else:
     # This is needed to differentiate LongText / SQL from str when building
     # the definition otherwise the label `param: LongText` would be indistinguishable
@@ -21,6 +22,7 @@ else:
     # e.g. param: LongText = "foo"
     LongText = NewType("LongText", str)
     SQL = NewType("SQL", str)
+    JSON = NewType("JSON", JSONType)
 
 
 @dataclasses.dataclass(frozen=True)

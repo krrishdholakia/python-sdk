@@ -22,4 +22,4 @@ from airplane.output import append_output, set_output, write_named_output, write
 from airplane.params import LabeledOption, ParamConfig
 from airplane.runtime import execute, prompt
 from airplane.runtime.standard import run  # Deprecated
-from airplane.types import SQL, ConfigVar, File, LongText
+from airplane.types import JSON, SQL, ConfigVar, File, LongText

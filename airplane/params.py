@@ -5,7 +5,7 @@ from typing import Any, Generic, List, Optional, Sequence, Tuple, Type, TypeVar,
 from typing_extensions import Annotated, Literal, get_args, get_origin
 
 from airplane.exceptions import InvalidAnnotationException
-from airplane.types import SQL, ConfigVar, File, LongText
+from airplane.types import JSON, SQL, ConfigVar, File, LongText
 
 SERIALIZED_DATE_FORMAT = "%Y-%m-%d"
 SERIALIZED_DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -23,6 +23,7 @@ ParamType = Literal[
     "date",
     "datetime",
     "configvar",
+    "json",
 ]
 
 ParamTypes = Union[
@@ -36,6 +37,7 @@ ParamTypes = Union[
     datetime.date,
     datetime.datetime,
     ConfigVar,
+    JSON,
 ]
 
 PromptParamTypes = Union[
@@ -49,6 +51,7 @@ PromptParamTypes = Union[
     Type[datetime.date],
     Type[datetime.datetime],
     Type[ConfigVar],
+    Type[JSON],
     # To support Annotated types
     object,
 ]
@@ -62,6 +65,7 @@ SerializedParamType = Union[
     Literal["date"],
     Literal["datetime"],
     Literal["configvar"],
+    Literal["json"],
 ]
 
 
@@ -70,7 +74,7 @@ SerializedParamComponent = Union[
     Literal["textarea"],
 ]
 
-SerializedParamValue = Union[str, bool, int, float, None]
+SerializedParamValue = Union[str, bool, int, float, JSON, None]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -118,6 +122,7 @@ AllOptions = Union[
     OptionsT[datetime.date],
     OptionsT[datetime.datetime],
     OptionsT[ConfigVar],
+    OptionsT[JSON],
 ]
 
 
@@ -182,6 +187,8 @@ def to_airplane_type(
         return "datetime"
     if type_hint == ConfigVar:
         return "configvar"
+    if type_hint == JSON:
+        return "json"
 
     raise InvalidAnnotationException(
         prefix=f"Invalid type annotation `{type_hint}`",
@@ -216,6 +223,8 @@ def to_serialized_airplane_type(
         return "datetime", None
     if type_hint == ConfigVar:
         return "configvar", None
+    if type_hint == JSON:
+        return "json", None
 
     raise InvalidAnnotationException(
         prefix=f"Invalid type annotation `{type_hint}`",
@@ -264,13 +273,14 @@ def resolve_type(
     return type_hint, False, None
 
 
-ParamDefTypes = Union[str, int, float]
+ParamDefTypes = Union[str, int, float, JSON]
 
 # ParamDefs have a subset of types that are built in and serializable.
 ParamDefOptions = Union[
     List[LabeledOption[str]],
     List[LabeledOption[int]],
     List[LabeledOption[float]],
+    List[LabeledOption[JSON]],
 ]
 
 

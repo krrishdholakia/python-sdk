@@ -21,8 +21,8 @@ from airplane.params import (
     SERIALIZED_DATE_FORMAT,
     SERIALIZED_DATETIME_FORMAT,
     SERIALIZED_DATETIME_MILLISECONDS_FORMAT,
-    LabeledOption,
     ParamConfig,
+    ParamDefOptions,
     ParamDefTypes,
     ParamType,
     ParamTypes,
@@ -300,14 +300,6 @@ def task(
         return wrapped
 
     return decorator
-
-
-# ParamDefs have a subset of types that are built in and serializable.
-ParamDefOptions = Union[
-    List[LabeledOption[str]],
-    List[LabeledOption[int]],
-    List[LabeledOption[float]],
-]
 
 
 @dataclasses.dataclass(frozen=True)

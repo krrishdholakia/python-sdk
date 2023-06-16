@@ -10,7 +10,6 @@ from airplane.api.entities import Run, RunStatus
 from airplane.config import (
     EnvVar,
     ExplicitPermissions,
-    LabeledOption,
     ParamConfig,
     ParamDef,
     PermissionAssignees,
@@ -24,6 +23,7 @@ from airplane.exceptions import (
     InvalidTaskConfigurationException,
     UnsupportedDefaultTypeException,
 )
+from airplane.params import LabeledOption
 from airplane.types import SQL, ConfigVar, File, LongText
 from airplane.utils import make_slug
 
