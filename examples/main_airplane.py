@@ -29,7 +29,7 @@ def python_sdk_standard(name: str = "") -> str:
     )
 
     if len(companies) == 0:
-        raise Exception("Found no companies")
+        raise Exception("Found no companies")  # pylint: disable=broad-exception-raised
     if len(companies) == 1:
         return companies[0]
 

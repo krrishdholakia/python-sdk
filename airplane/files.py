@@ -43,6 +43,7 @@ def upload(payload: Union[bytes, str], file_name: Optional[str] = None) -> File:
             upload_response["writeOnlyURL"],
             data=payload,
             headers={"X-Goog-Content-Length-Range": f"0,{len(payload)}"},
+            timeout=600,
         )
         response.raise_for_status()
     except requests.HTTPError as err:

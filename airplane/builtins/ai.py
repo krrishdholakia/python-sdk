@@ -8,7 +8,7 @@ import openai
 import requests
 from typing_extensions import Literal
 
-from airplane.exceptions import InvalidEnvironmentException
+from airplane.exceptions import HTTPError, InvalidEnvironmentException
 
 logging = True  # pylint: disable=invalid-name
 
@@ -290,9 +290,13 @@ def _anthropic_chat(
             "temperature": temperature if temperature is not None else 0,
             "stop_sequences": ["\n\nHuman:"],
         },
+        timeout=300,
     )
     if resp.status_code != 200:
-        raise Exception(f"Anthropic API returned status code {resp.status_code}")
+        raise HTTPError(
+            status_code=resp.status_code,
+            message=f"Anthropic API returned an error: {resp.json()['error']}",
+        )
 
     return resp.json()["completion"].lstrip()
 
