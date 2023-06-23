@@ -31,6 +31,7 @@ class BodyType(Enum):
 class RequestOutput(TypedDict):
     """The output of the rest.request builtin."""
 
+    status_code: int
     response: Union[str, Dict[str, Any]]
 
 
