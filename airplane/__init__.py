@@ -11,6 +11,7 @@ from airplane.config import (
     PermissionAssignees,
     Resource,
     Schedule,
+    Webhook,
     task,
 )
 from airplane.exceptions import (

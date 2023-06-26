@@ -16,6 +16,7 @@ from airplane.config import (
     Resource,
     Schedule,
     TaskDef,
+    Webhook,
     task,
 )
 from airplane.exceptions import (
@@ -51,6 +52,7 @@ def test_definition_with_defaults() -> None:
         constraints=None,
         schedules=None,
         resources=None,
+        webhooks=None,
         parameters=[
             ParamDef(
                 arg_name="param",
@@ -156,6 +158,7 @@ def test_decorator_with_parameters() -> None:
         slug="task_slug",
         name="Name of task",
         schedules=schedules,
+        webhooks=None,
         resources=resources,
         description="description",
         require_requests=True,
@@ -185,6 +188,7 @@ def test_decorator_with_parameters() -> None:
         default_run_permissions="task-viewers",
         constraints={"a": "b"},
         schedules=schedules,
+        webhooks=None,
         resources=resources,
         parameters=[],
         entrypoint_func="my_task",
@@ -241,6 +245,7 @@ def test_decorator_with_explicit_permissions() -> None:
         default_run_permissions=None,
         constraints=None,
         schedules=None,
+        webhooks=None,
         resources=None,
         parameters=[],
         permissions=permissions,
@@ -271,6 +276,7 @@ def test_decorator_with_team_access_permissions() -> None:
         default_run_permissions=None,
         constraints=None,
         schedules=None,
+        webhooks=None,
         resources=None,
         parameters=[],
         permissions="team_access",
@@ -331,6 +337,7 @@ def test_param_configs() -> None:
         default_run_permissions=None,
         constraints=None,
         schedules=None,
+        webhooks=None,
         resources=None,
         parameters=[
             ParamDef(
@@ -978,6 +985,7 @@ def test_definition_nested_types() -> None:
         default_run_permissions=None,
         constraints=None,
         schedules=None,
+        webhooks=None,
         resources=None,
         parameters=[
             ParamDef(
@@ -1044,6 +1052,7 @@ def test_param_config_default() -> None:
         default_run_permissions=None,
         constraints=None,
         schedules=None,
+        webhooks=None,
         resources=None,
         parameters=[
             ParamDef(

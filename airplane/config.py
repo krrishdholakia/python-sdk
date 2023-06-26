@@ -123,6 +123,21 @@ class Schedule:
     param_values: Optional[Dict[str, Optional[ParamTypes]]] = None
 
 
+@dataclasses.dataclass(frozen=True)
+class Webhook:
+    """Airplane webhook definition.
+
+    Webhooks allow users to trigger tasks via HTTP requests.
+
+    Attributes:
+        slug:
+            Human-friendly identifier used for the webhook. Webhook slugs must be unique
+            within an individual task / workflow.
+    """
+
+    slug: str
+
+
 @dataclasses.dataclass
 class PermissionAssignees:
     """Airplane permission assignees.
@@ -182,6 +197,7 @@ def task(
     constraints: Optional[Dict[str, str]] = None,
     resources: Optional[List[Resource]] = None,
     schedules: Optional[List[Schedule]] = None,
+    webhooks: Optional[List[Webhook]] = None,
     env_vars: Optional[List[EnvVar]] = None,
     permissions: Optional[Union[Literal["team_access"], ExplicitPermissions]] = None,
 ) -> Callable[[Callable[P, Any]], Callable[P, Run]]:
@@ -258,6 +274,9 @@ def task(
         schedules:
             Schedules to attach to this task. Schedules allow users to automatically run
             task on a recurring schedule.
+        webhooks:
+            Webhooks to attach to this task. Webhooks allow users to trigger tasks
+            from external systems via HTTP request.
         env_vars:
             Enviornment variables to attach to this task. Environment variables allow users
             to configure constant values or reference config variables.
@@ -286,6 +305,7 @@ def task(
             constraints=constraints,
             resources=resources,
             schedules=schedules,
+            webhooks=webhooks,
             env_vars=env_vars,
             permissions=permissions,
         )
@@ -343,6 +363,7 @@ class TaskDef:
     env_vars: Optional[List[EnvVar]]
     permissions: Optional[Union[Literal["team_access"], ExplicitPermissions]]
     sdk_version: str = dataclasses.field(default=__version__, init=False)
+    webhooks: Optional[List[Webhook]]
 
     def run(self, params: Dict[str, Any]) -> Any:
         """Execute task function from param dictionary"""
@@ -398,6 +419,7 @@ class TaskDef:
         constraints: Optional[Dict[str, str]],
         resources: Optional[List[Resource]],
         schedules: Optional[List[Schedule]],
+        webhooks: Optional[List[Webhook]],
         env_vars: Optional[List[EnvVar]],
         permissions: Optional[Union[Literal["team_access"], ExplicitPermissions]],
     ) -> "TaskDef":
@@ -505,4 +527,5 @@ class TaskDef:
             env_vars=env_vars,
             permissions=permissions,
             entrypoint_func=func.__name__,
+            webhooks=webhooks,
         )
