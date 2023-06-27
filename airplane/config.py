@@ -133,9 +133,13 @@ class Webhook:
         slug:
             Human-friendly identifier used for the webhook. Webhook slugs must be unique
             within an individual task / workflow.
+        require_airplane_token:
+            Require an Airplane API key to be passed in the `X-Airplane-API-Key` header.
+            Defaults to False.
     """
 
     slug: str
+    require_airplane_token: bool = False
 
 
 @dataclasses.dataclass
