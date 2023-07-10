@@ -339,6 +339,7 @@ class ParamDef:
     description: Optional[str]
     default: Optional[ParamDefTypes]
     required: Optional[bool]
+    multi: Optional[bool]
     options: Optional[ParamDefOptions]
     regex: Optional[str]
 
@@ -379,29 +380,16 @@ class TaskDef:
                 if not param.required:
                     func_args[param.arg_name] = None
                 # Otherwise, we fall back to the function default arguments.
-            elif param.type == "date":
-                func_args[param.arg_name] = datetime.datetime.strptime(
-                    params[param.slug], SERIALIZED_DATE_FORMAT
-                ).date()
-            elif param.type == "datetime":
-                func_args[param.arg_name] = datetime.datetime.strptime(
-                    params[param.slug],
-                    SERIALIZED_DATETIME_MILLISECONDS_FORMAT
-                    if "." in params[param.slug]
-                    else SERIALIZED_DATETIME_FORMAT,
-                )
-            elif param.type == "upload":
-                func_args[param.arg_name] = File(
-                    id=params[param.slug]["id"],
-                    url=params[param.slug]["url"],
-                )
-            elif param.type == "configvar":
-                func_args[param.arg_name] = ConfigVar(
-                    name=params[param.slug]["name"],
-                    value=params[param.slug]["value"],
-                )
+                continue
+
+            if param.multi:
+                func_args[param.arg_name] = [
+                    _convert_task_param(param, value) for value in params[param.slug]
+                ]
             else:
-                func_args[param.arg_name] = params[param.slug]
+                func_args[param.arg_name] = _convert_task_param(
+                    param, params[param.slug]
+                )
 
         return self.func(**func_args)
 
@@ -450,11 +438,12 @@ class TaskDef:
                     func_name=func.__name__,
                     param_name=param.name,
                 )
-            resolved_type, is_optional, param_config = resolve_type(
+            param_info = resolve_type(
                 param.name,
                 type_hint,
                 func_name=func.__name__,
             )
+            param_config = param_info.param_config
             if param_config is None:
                 param_config = ParamConfig()
 
@@ -481,11 +470,14 @@ class TaskDef:
                     # Parameter slug is the parameter's name in snakecase
                     slug=param_config.slug or default_slug,
                     name=param_config.name or inflection.humanize(default_slug),
-                    type=to_airplane_type(param.name, resolved_type, func.__name__),
+                    type=to_airplane_type(
+                        param.name, param_info.resolved_type, func.__name__
+                    ),
                     description=param_config.description
                     or param_descriptions.get(param.name),
-                    required=not is_optional,
+                    required=not param_info.is_optional,
                     default=default,
+                    multi=param_info.is_multi,
                     options=make_options(param_config),
                     regex=param_config.regex,
                 )
@@ -533,3 +525,27 @@ class TaskDef:
             entrypoint_func=func.__name__,
             webhooks=webhooks,
         )
+
+
+def _convert_task_param(param: ParamDef, value: Any) -> Any:
+    if param.type == "date":
+        return datetime.datetime.strptime(value, SERIALIZED_DATE_FORMAT).date()
+    if param.type == "datetime":
+        return datetime.datetime.strptime(
+            value,
+            SERIALIZED_DATETIME_MILLISECONDS_FORMAT
+            if "." in value
+            else SERIALIZED_DATETIME_FORMAT,
+        )
+    if param.type == "upload":
+        value = File(
+            id=value["id"],
+            url=value["url"],
+        )
+    if param.type == "configvar":
+        return ConfigVar(
+            name=value["name"],
+            value=value["value"],
+        )
+
+    return value

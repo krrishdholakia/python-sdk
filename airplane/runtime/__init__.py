@@ -111,26 +111,17 @@ class Prompt:
                 if param.constraints.optional:
                     prompt_values[param.slug] = None
                 # We should never get here...
-            elif param.type == "date":
-                prompt_values[param.slug] = datetime.datetime.strptime(
-                    prompt_values[param.slug], SERIALIZED_DATE_FORMAT
-                ).date()
-            elif param.type == "datetime":
-                prompt_values[param.slug] = datetime.datetime.strptime(
+                continue
+
+            if param.multi:
+                prompt_values[param.slug] = [
+                    _convert_prompt_param(param, value)
+                    for value in prompt_values[param.slug]
+                ]
+            else:
+                prompt_values[param.slug] = _convert_prompt_param(
+                    param,
                     prompt_values[param.slug],
-                    SERIALIZED_DATETIME_MILLISECONDS_FORMAT
-                    if "." in prompt_values[param.slug]
-                    else SERIALIZED_DATETIME_FORMAT,
-                )
-            elif param.type == "upload":
-                prompt_values[param.slug] = File(
-                    id=prompt_values[param.slug]["id"],
-                    url=prompt_values[param.slug]["url"],
-                )
-            elif param.type == "configvar":
-                prompt_values[param.slug] = ConfigVar(
-                    name=prompt_values[param.slug]["name"],
-                    value=prompt_values[param.slug]["value"],
                 )
 
         return prompt_values
@@ -154,6 +145,30 @@ class Prompt:
             email=user_info["email"],
             name=user_info["name"],
         )
+
+
+def _convert_prompt_param(param: SerializedParam, value: Any) -> Any:
+    if param.type == "date":
+        return datetime.datetime.strptime(value, SERIALIZED_DATE_FORMAT).date()
+    if param.type == "datetime":
+        return datetime.datetime.strptime(
+            value,
+            SERIALIZED_DATETIME_MILLISECONDS_FORMAT
+            if "." in value
+            else SERIALIZED_DATETIME_FORMAT,
+        )
+    if param.type == "upload":
+        return File(
+            id=value["id"],
+            url=value["url"],
+        )
+    if param.type == "configvar":
+        return ConfigVar(
+            name=value["name"],
+            value=value["value"],
+        )
+
+    return value
 
 
 @overload
@@ -248,7 +263,8 @@ def prompt(
 
     serialized_params = []
     for slug, param in (params or {}).items():
-        resolved_type, is_optional, param_config = resolve_type(slug, param)
+        param_info = resolve_type(slug, param)
+        param_config = param_info.param_config
         if param_config is None:
             param_config = ParamConfig()
 
@@ -256,7 +272,9 @@ def prompt(
         if default is not None:
             default = serialize_param(default)
 
-        serialized_type, component = to_serialized_airplane_type(slug, resolved_type)
+        serialized_type, component = to_serialized_airplane_type(
+            slug, param_info.resolved_type
+        )
         slug = param_config.slug or slug
         serialized_params.append(
             SerializedParam(
@@ -266,8 +284,9 @@ def prompt(
                 component=component,
                 desc=param_config.description,
                 default=default,
+                multi=param_info.is_multi,
                 constraints=Constraints(
-                    optional=is_optional,
+                    optional=param_info.is_optional,
                     options=make_options(param_config),
                     regex=param_config.regex,
                 ),

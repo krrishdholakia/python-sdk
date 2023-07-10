@@ -97,6 +97,7 @@ class SerializedParam:
     desc: Optional[str] = None
     component: Optional[SerializedParamComponent] = None
     default: Optional[SerializedParamValue] = None
+    multi: Optional[bool] = None
 
 
 DefaultParamT = TypeVar(
@@ -233,11 +234,21 @@ def to_serialized_airplane_type(
     )
 
 
+@dataclasses.dataclass
+class ParamInfo:
+    """Information about a parameter."""
+
+    resolved_type: Any
+    is_optional: bool
+    is_multi: bool
+    param_config: Optional[ParamConfig]
+
+
 def resolve_type(
     param_name: str,
     type_hint: Any,
     func_name: Optional[str] = None,
-) -> Tuple[Any, bool, Optional[ParamConfig]]:
+) -> ParamInfo:
     """Parses a parameter's type hint to extract its underlying type,
     whether it's optional, and a ParamConfig if provided."""
 
@@ -250,10 +261,44 @@ def resolve_type(
                 func_name=func_name,
                 param_name=param_name,
             )
-        underlying_type, _, param_config = resolve_type(
-            param_name, type_args[0], func_name
+        param_info = resolve_type(param_name, type_args[0], func_name)
+        return ParamInfo(
+            resolved_type=param_info.resolved_type,
+            is_optional=True,
+            is_multi=param_info.is_multi,
+            param_config=param_info.param_config,
         )
-        return underlying_type, True, param_config
+
+    if origin_type == list:
+        type_args = get_args(type_hint)
+        if len(type_args) != 1:
+            raise InvalidAnnotationException(
+                prefix=f"Unsupported List type `{type_hint}`",
+                func_name=func_name,
+                param_name=param_name,
+            )
+        param_info = resolve_type(param_name, type_args[0], func_name)
+        if param_info.is_optional:
+            raise InvalidAnnotationException(
+                prefix=(
+                    f"Unsupported Optional in List: `{type_hint}`,"
+                    + "did you mean to have Optional[List[...]]?"
+                ),
+                func_name=func_name,
+                param_name=param_name,
+            )
+        if param_info.is_multi:
+            raise InvalidAnnotationException(
+                prefix=f"Unsupported List of List: `{type_hint}`",
+                func_name=func_name,
+                param_name=param_name,
+            )
+        return ParamInfo(
+            resolved_type=param_info.resolved_type,
+            is_optional=param_info.is_optional,
+            is_multi=True,
+            param_config=param_info.param_config,
+        )
 
     if origin_type == Annotated:
         type_args = get_args(type_hint)
@@ -266,11 +311,19 @@ def resolve_type(
                 param_name=param_name,
             )
         param_config = param_configs[0] if param_configs else None
-        underlying_type, is_optional, _ = resolve_type(
-            param_name, type_args[0], func_name
+        param_info = resolve_type(param_name, type_args[0], func_name)
+        return ParamInfo(
+            resolved_type=param_info.resolved_type,
+            is_optional=param_info.is_optional,
+            is_multi=param_info.is_multi,
+            param_config=param_config,
         )
-        return underlying_type, is_optional, param_config
-    return type_hint, False, None
+    return ParamInfo(
+        resolved_type=type_hint,
+        is_optional=False,
+        is_multi=False,
+        param_config=None,
+    )
 
 
 ParamDefTypes = Union[str, int, float, JSON]
