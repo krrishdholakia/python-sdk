@@ -1,3 +1,4 @@
+import sys
 from typing import Any, List, Optional, Union
 
 import pytest
@@ -200,3 +201,17 @@ def test_invalid_type() -> None:
         match="Invalid type annotation.*",
     ):
         to_serialized_airplane_type("param", CustomType)
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 10), reason="requires python3.10 optional syntax"
+)
+def test_python_uniontype_optional() -> None:
+    # Have to use eval() to avoid syntax error
+    optional_type = eval("str | None")
+    info = resolve_type(
+        "param",
+        optional_type,
+    )
+    assert info.is_optional
+    assert info.resolved_type == str

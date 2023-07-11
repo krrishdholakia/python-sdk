@@ -1,5 +1,6 @@
 import dataclasses
 import datetime
+import types
 from typing import Any, Generic, List, Optional, Sequence, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Annotated, Literal, get_args, get_origin
@@ -253,7 +254,9 @@ def resolve_type(
     whether it's optional, and a ParamConfig if provided."""
 
     origin_type = get_origin(type_hint)
-    if origin_type == Union:
+    if origin_type is Union or (
+        hasattr(types, "UnionType") and origin_type is getattr(types, "UnionType")
+    ):
         type_args = get_args(type_hint)
         if len(type_args) != 2 or type_args[1] is not type(None):
             raise InvalidAnnotationException(
