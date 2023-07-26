@@ -157,6 +157,7 @@ def run(
         requests.exceptions.Timeout,
         RunPendingException,
     ),
+    logger=None,
 )
 def __wait_for_run_completion(run_id: str) -> Dict[str, Any]:
     client = api_client_from_env()
@@ -173,6 +174,7 @@ def __wait_for_run_completion(run_id: str) -> Dict[str, Any]:
         requests.exceptions.Timeout,
         RequestPendingException,
     ),
+    logger=None,
 )
 def __wait_for_request_completion(trigger_request_id: str) -> Dict[str, Any]:
     client = api_client_from_env()
@@ -211,6 +213,7 @@ def prompt_background(
         requests.exceptions.Timeout,
         PromptPendingException,
     ),
+    logger=None,
 )
 def wait_for_prompt(prompt_id: str) -> Dict[str, Any]:
     """Waits until a prompt is submitted and returns the prompt values."""
