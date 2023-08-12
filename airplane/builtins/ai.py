@@ -7,7 +7,8 @@ from typing import Any, List, Optional, Tuple
 import openai
 import requests
 from typing_extensions import Literal
-
+import litellm 
+from litellm import completion
 from airplane.exceptions import HTTPError, InvalidEnvironmentException
 
 logging = True  # pylint: disable=invalid-name
@@ -228,17 +229,14 @@ def _chat(
 
     openai_api_key = os.environ.get("OPENAI_API_KEY")
     anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
-
-    if openai_api_key:
-        openai.api_key = openai_api_key
-        response = _openai_chat(messages, model, temperature)
-    elif anthropic_api_key:
-        response = _anthropic_chat(messages, model, temperature)
-    else:
-        raise InvalidEnvironmentException(
-            "Must specify one of OPENAI_API_KEY or ANTHROPIC_API_KEY"
-        )
-
+    api_messages = [
+        {
+            "role": message.role,
+            "content": message.content,
+        }
+        for message in messages
+    ]
+    response = completion(model=model, messages= api_messages, temperature=temperature)
     if logging:
         print(f"AI Response: ({response})")
     return response
